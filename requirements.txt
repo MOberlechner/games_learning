@@ -1,0 +1,8 @@
+numpy
+pandas
+matplotlib
+tqdm
+ipykernel
+pre-commit
+black
+isort
