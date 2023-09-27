@@ -48,7 +48,7 @@ def visualize_breakpoints(
             vmax=100,
         )
     cbar = plt.colorbar()
-    cbar.set_label(f"Convergence in % ({n_runs} runs)", rotation=270, labelpad=15)
+    cbar.set_label(f"Conv. in % ({n_runs} runs)", rotation=270, labelpad=15)
 
     # Vis original game
     plt.scatter(
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     setting = "compl_info"
     n_actions = 16
     eta = 100
-    num_runs = 25
+    num_runs = 10
 
     path_data = "../results/data/"
     path_plots = "../results/plots/"
