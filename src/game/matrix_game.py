@@ -1,11 +1,27 @@
-from typing import List
+from typing import List, Tuple, Union
 
 import numpy as np
 
-from src.game.game import Game
 
+class MatrixGame:
+    """Class for Matrix-Game G = (N, A, u)
 
-class MatrixGame(Game):
+    with
+        - N is the set of agents
+        - A is the finite set of actions
+        - u is the utility function which can be written as a payoff matrix/tensor
+    We consider the mixed extension of the game.
+
+    Methods:
+        given a profile of mixed strategies, we can compute
+        - gradient      compute gradient for agent
+        - utility (expected utility)
+        - best response
+        - utility loss
+        - init_strategies
+
+    """
+
     def __init__(self, n_agents: int, payoff_matrix: List[np.ndarray]):
         """Matrix Game
 
@@ -14,12 +30,17 @@ class MatrixGame(Game):
             payoff_matrices (List[np.ndarray]): list of payoff matrices
             name (str, optional): _description_. Defaults to "".
         """
-        super().__init__(n_agents)
-        self.name = "matrix_game"
+        self.name = "MatrixGame"
+        self.agents = list(range(n_agents))
+        self.n_agents = n_agents
+        self.n_actions = list(payoff_matrix[0].shape)
         self.payoff_matrix = payoff_matrix
 
         assert len(payoff_matrix) == n_agents
         assert len(payoff_matrix[0].shape) == n_agents
+
+    def __repr__(self) -> str:
+        return f"MatrixGame(agents={self.n_agents}, actions={self.n_actions})"
 
     def gradient(self, strategies: List, agent: int) -> np.ndarray:
         """Gradient Function
@@ -33,8 +54,7 @@ class MatrixGame(Game):
         """
         assert np.all([s.ndim == 1 for s in strategies])
         strategies_opp = remove_index(strategies, agent)
-
-        subscript = self.get_einsum_subscripts(agent)
+        subscript = get_einsum_subscripts(agent, self.n_agents)
         return np.einsum(subscript, *strategies_opp, self.payoff_matrix[agent])
 
     def utility(self, strategies: List[np.ndarray], agent) -> float:
@@ -49,20 +69,6 @@ class MatrixGame(Game):
         """
         gradient = self.gradient(strategies, agent)
         return gradient.dot(strategies[agent])
-
-    def get_einsum_subscripts(self, agent: int) -> str:
-        """create subscripts used in np.einsum method to compute gradient
-
-        Args:
-            agent (int): index of agent
-            function (str, optional): choose between utility or gradient. Defaults to "gradient".
-
-        Returns:
-            str: subscript
-        """
-        indices = "".join([chr(ord("a") + i) for i in self.agents])
-        indices_opp = remove_index(indices, agent)
-        return f"{','.join(indices_opp)},{indices}->{indices[agent]}"
 
     def best_response(self, gradient: np.ndarray) -> np.ndarray:
         """compute best response given the gradient
@@ -93,13 +99,96 @@ class MatrixGame(Game):
         """
         gradient = self.gradient(strategies, agent)
         best_response = self.best_response(gradient)
-
         if normed:
             return 1 - gradient.dot(strategies[agent]) / gradient.dot(best_response)
         else:
             return gradient.dot(best_response) - gradient.dot(strategies[agent])
 
+    def init_strategies(self, method: str = "random") -> Tuple[np.ndarray]:
+        """generate initial mixed strategies
+
+        Args:
+            method (str, optional): different initializations methods. Defaults to "random".
+                Note that random uses a Dirichlet distribution which generates uniform distributed points
+                from the probability simplex.
+
+        Returns:
+            Tuple[np.ndarray]: profile of mixed strategies
+        """
+        if method == "equal":
+            return tuple(
+                np.ones(self.n_actions[i]) / self.n_actions[i] for i in self.agents
+            )
+
+        elif method == "random":
+            return tuple(
+                np.random.dirichlet((1,) * self.n_actions[i]) for i in self.agents
+            )
+
+        elif method == "uniform":
+            uniform_numbers = tuple(
+                np.randrom.rand(self.n_actions[i]) for i in self.agents
+            )
+            return tuple(
+                uniform_numbers[i] / uniform_numbers[i].sum() for i in self.agents
+            )
+
+        else:
+            raise ValueError(
+                f"init method {method} not available. Choose from equal, random, or uniform."
+            )
+
+
+class RandomMatrixGame(MatrixGame):
+    def __init__(
+        self,
+        n_agents,
+        n_actions: list[int],
+        seed: int = None,
+        distribution: str = "uniform",
+    ):
+        """Create random matrix game
+
+        Args:
+            n_agents (_type_): _description_
+            n_actions (list[int]): _description_
+        """
+        payoff_matrix = self.create_matrices(n_agents, n_actions, seed, distribution)
+        assert n_agents == len(n_actions)
+        super().__init__(n_agents, payoff_matrix)
+
+    def create_matrices(
+        self, n_agents: int, n_actions: list, seed: int, distribution: str
+    ):
+        """Generate random payoff matrix
+
+        Args:
+            n_agents (int): number of agents
+            n_actions (list): number of actions for each agents
+            seed (int): seed for random generator
+            distribution (str): distribution of entries of payoff matrices
+
+        Returns:
+            np.ndarray: contains all payoff matrices
+        """
+        dimension = tuple([n_agents] + n_actions)
+        rng = np.random.default_rng(seed)
+        if distribution == "uniform":
+            return rng.random(size=dimension, dtype=np.float64)
+        else:
+            raise NotImplementedError(f"Distribition {distribution} not implemented")
+
+
+# ------------------------------ HELPERFUNCTIONS ------------------------------ #
+
 
 def remove_index(l: list, i: int):
     """remove i-th entry from list"""
     return l[:i] + l[i + 1 :]
+
+
+def get_einsum_subscripts(agent: int, n_agents: int) -> str:
+    """create indices used in einsum to compute gradient"""
+    indices = "".join([chr(ord("a") + i) for i in range(n_agents)])
+    indices_opp = remove_index(indices, agent)
+    return f"{','.join(indices_opp)},{indices}->{indices[agent]}"
