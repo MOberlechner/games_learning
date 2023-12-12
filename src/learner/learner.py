@@ -2,20 +2,25 @@ from typing import List
 
 import numpy as np
 
-from src.game.game import Game
+from src.game.matrix_game import MatrixGame
 
 
 class Learner:
+    """General Learner Class
+
+    We focus on gradient-based learning algorithms. This is why we include gradients as input to avoid recomputation for metrics etc.
+
+    """
+
     def __init__(self) -> None:
         self.name = "general_learner"
 
     def update(
         self,
-        strategies: List[np.ndarray],
-        gradients: List[np.ndarray],
+        strategies: Tuple[np.ndarray],
+        gradients: Tuple[np.ndarray],
         iter: int,
-        game: Game,
-    ) -> List[np.ndarray]:
+    ) -> Tuple[np.ndarray]:
         """Update strategies
 
         Args:
@@ -25,42 +30,41 @@ class Learner:
             game (Game): underlying game
 
         Returns:
-            List[np.ndarray]: list of updated strategies
+            Tuple[np.ndarray]: list of updated strategies
         """
         raise NotImplementedError
 
 
-class SOMA(Learner):
+class MirrorAscent(Learner):
     def __init__(self, eta: float, beta: float, mirror_map: str = "entropic") -> None:
-        """Simultanoues Online Mirror Ascent
+        """Mirror Ascent
 
         Args:
             eta (float): (initial) step size
             beta (float): decay of step size
         """
-        self.name = f"soma_{mirror_map}"
+        self.name = f"mirr_ascent({mirror_map})"
         self.eta = eta
         self.beta = beta
         self.mirror_map = mirror_map
 
     def update(
         self,
-        strategies: List[np.ndarray],
-        gradients: List[np.ndarray],
+        strategies: Tuple[np.ndarray],
+        gradients: Tuple[np.ndarray],
         iter: int,
-        game: Game,
-    ) -> List[np.ndarray]:
+    ) -> Tuple[np.ndarray]:
         """update strategies
 
         Args:
-            strategies (List): list of agents' strategies
+            strategies (Tuple): agents' current strategies
+            gradients (List[np.ndarray]): agents' gradients
             iter (int): current iteration
-            game (Game): underlying game
 
         Returns:
-            List[np.ndarray]: list of updated strategies
+            Tuple[np.ndarray]: updated strategies
         """
-        gradients = [game.gradient(strategies, i) for i in game.agents]
+        gradients = tuple(game.gradient(strategies, i) for i in game.agents)
         if self.mirror_map == "euclidean":
             return [
                 self.update_step_euclidean(strategies[i], gradients[i], iter)
