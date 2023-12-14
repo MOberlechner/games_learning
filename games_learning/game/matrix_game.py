@@ -22,12 +22,12 @@ class MatrixGame:
 
     """
 
-    def __init__(self, n_agents: int, payoff_matrix: List[np.ndarray]):
+    def __init__(self, n_agents: int, payoff_matrix: Tuple[np.ndarray]):
         """Matrix Game
 
         Args:
             n_agents (int): _description_
-            payoff_matrices (List[np.ndarray]): list of payoff matrices
+            payoff_matrices (Tuple[np.ndarray]): list of payoff matrices
             name (str, optional): _description_. Defaults to "".
         """
         self.name = "MatrixGame"
@@ -40,7 +40,7 @@ class MatrixGame:
         assert len(payoff_matrix[0].shape) == n_agents
 
     def __repr__(self) -> str:
-        return f"MatrixGame(agents={self.n_agents}, actions={self.n_actions})"
+        return f"MatrixGame(agents={self.n_agents},actions={self.n_actions})"
 
     def gradient(self, strategies: List, agent: int) -> np.ndarray:
         """Gradient Function
@@ -57,7 +57,7 @@ class MatrixGame:
         subscript = get_einsum_subscripts(agent, self.n_agents)
         return np.einsum(subscript, *strategies_opp, self.payoff_matrix[agent])
 
-    def utility(self, strategies: List[np.ndarray], agent) -> float:
+    def utility(self, strategies: Tuple[np.ndarray], agent) -> float:
         """compute utility
 
         Args:
@@ -155,7 +155,13 @@ class RandomMatrixGame(MatrixGame):
         """
         payoff_matrix = self.create_matrices(n_agents, n_actions, seed, distribution)
         assert n_agents == len(n_actions)
+
         super().__init__(n_agents, payoff_matrix)
+        self.seed = seed
+        self.distribution = distribution
+
+    def __repr__(self) -> str:
+        return f"Random(agents={self.n_agents}, actions={self.n_actions}, seed={self.seed})"
 
     def create_matrices(
         self, n_agents: int, n_actions: list, seed: int, distribution: str
@@ -175,6 +181,8 @@ class RandomMatrixGame(MatrixGame):
         rng = np.random.default_rng(seed)
         if distribution == "uniform":
             return rng.random(size=dimension, dtype=np.float64)
+        elif distribution == "normal":
+            return rng.normal(loc=0.0, scale=1.0, size=dimension)
         else:
             raise NotImplementedError(f"Distribition {distribution} not implemented")
 
