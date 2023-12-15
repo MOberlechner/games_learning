@@ -64,6 +64,7 @@ class FPSB(EconGame):
     ):
         self.valuation = np.ones(n_agents)
         super().__init__(n_agents, n_discr, interval)
+        self.name = "fpsb"
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for FPSB"""
@@ -87,6 +88,7 @@ class SPSB(EconGame):
     ):
         self.valuation = np.ones(n_agents)
         super().__init__(n_agents, n_discr, interval)
+        self.name = "spsb"
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for SPSB"""
@@ -110,6 +112,7 @@ class AllPay(EconGame):
     ):
         self.valuation = np.ones(n_agents)
         super().__init__(n_agents, n_discr, interval)
+        self.name = "allpay"
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for All-Pay Auction"""
@@ -133,6 +136,7 @@ class Contest(EconGame):
         self.csf_param = csf_param
         self.valuation = np.ones(n_agents)
         super().__init__(n_agents, n_discr, interval)
+        self.name = "contest"
 
     def allocation(self, action_profile: np.ndarray) -> np.ndarray:
         """compute winning probabilities for Tullock-Contest"""

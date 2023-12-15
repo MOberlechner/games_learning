@@ -30,7 +30,7 @@ class MatrixGame:
             payoff_matrices (Tuple[np.ndarray]): list of payoff matrices
             name (str, optional): _description_. Defaults to "".
         """
-        self.name = "MatrixGame"
+        self.name = "matrix_game"
         self.agents = list(range(n_agents))
         self.n_agents = n_agents
         self.n_actions = list(payoff_matrix[0].shape)
@@ -157,6 +157,7 @@ class RandomMatrixGame(MatrixGame):
         assert n_agents == len(n_actions)
 
         super().__init__(n_agents, payoff_matrix)
+        self.name = "random_matrix_game"
         self.seed = seed
         self.distribution = distribution
 
