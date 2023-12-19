@@ -17,6 +17,10 @@ class EconGame(MatrixGame):
     ):
         payoff_matrix = self.create_payoff_matrix(n_agents, n_discr, interval)
         super().__init__(n_agents=n_agents, payoff_matrix=payoff_matrix)
+        self.name = "econgame"
+
+    def __repr__(self) -> str:
+        return f"EconGame({self.name},{self.n_actions})"
 
     def create_payoff_matrix(
         self,
