@@ -143,7 +143,7 @@ class RandomMatrixGame(MatrixGame):
     def __init__(
         self,
         n_agents,
-        n_actions: list[int],
+        n_actions: List[int],
         seed: int = None,
         distribution: str = "uniform",
     ):
