@@ -88,6 +88,8 @@ class Simulator:
     def log_result(self) -> dict:
         """log final result"""
         return {
+            "game": self.game.name,
+            "learner": self.learner.name,
             "convergence": self.bool_convergence,
             "iterations": self.number_iter,
             "utility_loss": np.max(

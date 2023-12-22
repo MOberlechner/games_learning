@@ -49,7 +49,6 @@ def run_learning(econgame: EconGame, n_bins: int):
                 # log results
                 result.update(
                     {
-                        "game": econgame.name,
                         "run": run,
                         "potentialness": potent,
                         "eta": eta,
@@ -87,7 +86,7 @@ if __name__ == "__main__":
     # save results
     tag, filename = (
         "econgames_learning_stepsize",
-        f"{learner.name}_{n_agents}_{n_discr}.csv",
+        f"{n_agents}_{n_discr}.csv",
     )
     os.makedirs(os.path.join(PATH_TO_DATA, tag), exist_ok=True)
     df.to_csv(os.path.join(PATH_TO_DATA, tag, filename), index=False)
