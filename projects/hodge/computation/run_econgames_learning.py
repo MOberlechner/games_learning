@@ -60,7 +60,7 @@ def run_learning(econgame: EconGame, n_bins: int):
                 # if we found suitable (eta,beta): stop
                 if result["convergence"]:
                     break
-        return data
+    return data
 
 
 if __name__ == "__main__":
