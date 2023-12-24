@@ -25,6 +25,7 @@ def run_learning(econgame: EconGame, n_bins: int):
         n_runs (int): number of runs per instance
         n_bins (int): number of levels of potentialness
     """
+    label_game = econgame.name 
     # compute decomposition of original game
     hodge = Game([n_discr] * n_agents, save_load=False)
     hodge.compute_decomposition_matrix(econgame.payoff_matrix)
@@ -35,6 +36,7 @@ def run_learning(econgame: EconGame, n_bins: int):
         # create new game (with given potentialness) from econgame
         payoff_matrix = hodge.create_game_potentialness(potent)
         game = MatrixGame(n_agents, payoff_matrix)
+        game.name = label_game
 
         # run learning
         for run in range(N_RUNS):
