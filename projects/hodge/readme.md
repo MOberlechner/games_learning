@@ -1,8 +1,13 @@
 # Project: HODGE
-
+This project focuses on the connection between learnable equilibria and the potentialness of the game.
+Additional to the packages in [requirements.txt](../../requirements.txt), we also need the [decomposition](https://github.com/MOberlechner/games_decomposition) package which computes the hodge decomposition of a matrix game.
+Clone the project and install the package via
+```python
+pip install -e ../games_decomposition
+```
 
 ### Computation
-All experiments are stored in `projects/hodge/data/`.
+The parameters for the experiments and visualizations can be found in [configs.py](./configs.py). All experiments are stored in `projects/hodge/data/`.
 
 **Experiment 1 - Random Games** <br>
 Generate $n=10^6$ random games by sampling entries of the payoff matrices from $U([0,1])$ and compare potentialness for different number of actions and agents
