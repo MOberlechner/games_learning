@@ -2,9 +2,9 @@ import matplotlib
 
 # Parameter Learning
 MAX_ITER = 2_000
-TOL = 1e-10
+TOL = 1e-8
 N_RUNS = 10
-LIST_ETA = [2**7, 2**5, 2**3, 2, 1, 1 / 2, 1 / 2**3, 1 / 2**5]
+LIST_ETA = [2**9, 2**7, 2**5, 2**3, 2, 1, 1 / 2, 1 / 2**3, 1 / 2**5]
 LIST_BETA = [0.9, 0.5]
 
 
