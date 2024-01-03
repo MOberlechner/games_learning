@@ -39,8 +39,10 @@ def run_learning(econgame: EconGame, n_bins: int):
         game.name = label_game
 
         # run learning
-        for run in range(N_RUNS):
-            for eta, beta in product(LIST_ETA, LIST_BETA):
+        for eta, beta in product(LIST_ETA, LIST_BETA):
+
+            num_conv = 0
+            for run in range(N_RUNS):
 
                 # create learner
                 learner = MirrorAscent(eta=eta, beta=beta, mirror_map="entropic")
@@ -59,9 +61,13 @@ def run_learning(econgame: EconGame, n_bins: int):
                 )
                 data.append(result)
 
-                # if we found suitable (eta,beta): stop
-                if result["convergence"]:
-                    break
+                # icount number of convergences
+                num_conv += result["convergence"]
+
+            # if we converged in all runs, we don't need another eta/beta
+            if num_conv == 10:
+                break
+            
     return data
 
 
@@ -88,7 +94,7 @@ if __name__ == "__main__":
     # save results
     tag, filename = (
         "econgames_learning_stepsize",
-        f"{n_agents}_{n_discr}.csv",
+        f"{n_agents}_{n_discr}_tol_{TOL}.csv",
     )
     os.makedirs(os.path.join(PATH_TO_DATA, tag), exist_ok=True)
     df.to_csv(os.path.join(PATH_TO_DATA, tag, filename), index=False)

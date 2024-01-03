@@ -10,7 +10,7 @@ from projects.hodge.util import *
 
 def generate_plot_learning_random(list_agents, list_actions, n_bins=20):
     # Parameter
-    tag = "random_learning"
+    tag = "random_learning_128_0.9"
     learner = "mirror_ascent(entropic)"
 
     fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 4))
@@ -34,6 +34,8 @@ def generate_plot_learning_random(list_agents, list_actions, n_bins=20):
             setting = f"random_matrix_game_uniform_{n_agents}_{n_actions}"
             df = pd.read_csv(f"{PATH_TO_DATA}{tag}/{learner}_{setting}.csv")
             df["potentialness"] = map_bin_to_potentialness(df["bin"], n_bins)
+
+
             df = (
                 df.groupby(["potentialness"]).agg({"convergence": "mean"}).reset_index()
             )
