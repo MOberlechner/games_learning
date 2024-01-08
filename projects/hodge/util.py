@@ -17,7 +17,14 @@ def map_bin_to_potentialness(bin: int, n_bins: int) -> float:
     return midpoints[bin - 1]
 
 
-def save_result(data: list, tag, filename, PATH_TO_DATA):
+def save_result(data: list, tag, filename, PATH_TO_DATA, overwrite=True):
     os.makedirs(os.path.join(PATH_TO_DATA, tag), exist_ok=True)
-    df = pd.DataFrame(data)
-    df.to_csv(os.path.join(PATH_TO_DATA, tag, filename), index=False)
+    file = os.path.join(PATH_TO_DATA, tag, filename)
+
+    if (not overwrite) & (os.path.exists(file)):
+        df = pd.read_csv(file)
+        df = pd.concat([df, pd.DataFrame(data)])
+    else:
+        df = pd.DataFrame(data)
+
+    df.to_csv(file, index=False)
