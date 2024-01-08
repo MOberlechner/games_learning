@@ -16,7 +16,7 @@ def find_pure_nash_equilibrium(game: MatrixGame) -> Dict[str, List[tuple]]:
             weak_ne.append(a)
         elif result == 1:
             strict_ne.append(a)
-    return {"weak_ne": weak_ne, "strict_new": strict_ne}
+    return {"weak_ne": weak_ne, "strict_ne": strict_ne}
 
 
 def generate_action_profiles(n_actions: List[int]) -> Tuple[tuple]:
