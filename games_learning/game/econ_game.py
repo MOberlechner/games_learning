@@ -18,6 +18,7 @@ class EconGame(MatrixGame):
         payoff_matrix = self.create_payoff_matrix(n_agents, n_discr, interval)
         super().__init__(n_agents=n_agents, payoff_matrix=payoff_matrix)
         self.name = "econgame"
+        self.interval = interval
 
     def __repr__(self) -> str:
         return f"EconGame({self.name},{self.n_actions})"
@@ -40,6 +41,7 @@ class EconGame(MatrixGame):
         """
         # create action vector
         actions = np.linspace(*interval, n_discr)
+        self.actions = actions
         # compute utilities
         util_arr = np.array(
             [
@@ -158,3 +160,33 @@ class Contest(EconGame):
         allocation = self.allocation(action_profile)
         payments = action_profile
         return allocation * self.valuation - payments
+
+
+class Cournot(EconGame):
+    """Cournot Competition"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        a: float,
+        b: Tuple[float],
+        cost: Tuple[float],
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        self.a = a
+        self.b = b
+        self.cost = cost
+        assert len(b) == n_agents
+        assert len(cost) == n_agents
+
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "cournot"
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for Cournot Competition"""
+        return action_profile * (self.price(action_profile) - np.array(self.cost))
+
+    def price(self, action_profile: np.ndarray) -> float:
+        """Compute price given quantities (actions) of firms (agents)"""
+        return np.maximum(self.a - (np.array(self.b) * action_profile).sum(), 0.0)
