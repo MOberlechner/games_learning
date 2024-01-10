@@ -22,7 +22,9 @@ class MatrixGame:
 
     """
 
-    def __init__(self, n_agents: int, payoff_matrix: Tuple[np.ndarray]):
+    def __init__(
+        self, n_agents: int, payoff_matrix: Tuple[np.ndarray], name: str = "matrix_game"
+    ):
         """Matrix Game
 
         Args:
@@ -30,7 +32,7 @@ class MatrixGame:
             payoff_matrices (Tuple[np.ndarray]): list of payoff matrices
             name (str, optional): _description_. Defaults to "".
         """
-        self.name = "matrix_game"
+        self.name = name
         self.agents = list(range(n_agents))
         self.n_agents = n_agents
         self.n_actions = list(payoff_matrix[0].shape)
