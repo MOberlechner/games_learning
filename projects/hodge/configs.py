@@ -3,9 +3,9 @@ import matplotlib
 # Parameter Learning
 MAX_ITER = 2_000
 TOL = 1e-8
-N_RUNS = 10
-LIST_ETA = [2**9, 2**7, 2**5, 2**3, 2, 1, 1 / 2, 1 / 2**3, 1 / 2**5]
-LIST_BETA = [0.9, 0.5]
+N_RUNS = 20
+LIST_ETA = [2**i for i in [9, 6, 3, 0, -3, -6]]
+LIST_BETA = [0.05, 0.5]
 
 
 # Parameter Experiments
