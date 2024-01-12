@@ -1,4 +1,5 @@
 import os
+import sys
 from collections import deque
 from datetime import datetime
 from itertools import product
@@ -108,10 +109,14 @@ def run_learning_stepsizes(
                     }
                 )
                 data.append(result)
-
-    # save results
-    filename = f"{learner.name}_{game.name}_{distribution}_{n_agents}_{n_actions}.csv"
-    save_result(data, "random_learning", filename, PATH_TO_DATA)
+    if len(seed) > 0:
+        # save results
+        filename = (
+            f"{learner.name}_{game.name}_{distribution}_{n_agents}_{n_actions}.csv"
+        )
+        save_result(data, "random_learning", filename, PATH_TO_DATA)
+    else:
+        print(" -> Not enough settings found")
 
 
 if __name__ == "__main__":
