@@ -8,20 +8,32 @@ from projects.hodge.configs import *
 from projects.hodge.util import *
 
 
-def prepare_data_econgames(df):
-    # for each run pick "best" convergence result
-    df = (
-        df.groupby(["game", "learner", "potentialness", "run"])
-        .agg({"convergence": "max", "n_strict_ne": "first"})
-        .reset_index()
+def set_axis(xlim, ylim, title, xlabel: str = "", ylabel: str = ""):
+    """General settings for axis"""
+    fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 4))
+    ax = fig.add_subplot(111)
+    ax.set_xlabel(xlabel, fontsize=FONTSIZE_LABEL)
+    ax.set_ylabel(ylabel, fontsize=FONTSIZE_LABEL)
+    ax.set_ylim(ylim)
+    ax.set_xlim(xlim)
+    ax.grid(linestyle="-", linewidth=0.25, color="lightgrey", zorder=-10, alpha=0.2)
+    ax.set_title(title, fontsize=FONTSIZE_TITLE)
+    return fig, ax
+
+
+def prepare_data(df, include_seed: bool = True):
+    cols = ["game", "learner", "potentialness", "run"] + (
+        ["seed"] if include_seed else []
     )
+
+    # for each run pick "best" convergence result
+    df = df.groupby(cols).agg({"convergence": "max"}).reset_index()
     # aggregate results over runs
     df = (
         df.groupby(["game", "learner", "potentialness"])
         .agg(
             {
-                "convergence": "max",
-                "n_strict_ne": "first",
+                "convergence": "mean",
             }
         )
         .reset_index()
@@ -29,7 +41,7 @@ def prepare_data_econgames(df):
     return df
 
 
-def generate_plot_learning_econ_games(
+def plot_econ_games_scatter(
     n_agents: int,
     n_discr: int,
     interval: tuple,
@@ -46,7 +58,7 @@ def generate_plot_learning_econ_games(
     data = pd.read_csv(
         f"{PATH_TO_DATA}{tag}/{n_bins}bins_{n_agents}_{n_discr}_tol_{TOL}.csv"
     )
-    df = prepare_data_econgames(data)
+    df = prepare_data(data, include_seed=False)
     pot = pd.read_csv(f"{PATH_TO_DATA}econgames/potentialness.csv")
     pot = pot[
         (pot.n_agents == n_agents)
@@ -97,7 +109,7 @@ def generate_plot_learning_econ_games(
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
 
-def generate_plot_learning_random(list_agents, list_actions, n_bins=20):
+def plot_random_games_scatter(list_agents, list_actions, n_bins=20):
     # Parameter
     tag = "random_learning_128_0.9"
     learner = "mirror_ascent(entropic)"
@@ -149,9 +161,64 @@ def generate_plot_learning_random(list_agents, list_actions, n_bins=20):
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
 
+def plot_random_games_line():
+
+    # Parameter
+    n_bins = 25
+    distribution = "uniform"
+    learner = "mirror_ascent(entropic)"
+    fig, ax = set_axis((0, 1), (-0.001, 1.001), "", "Potentialness", "P(Convergence)")
+
+    # plot data
+    for j, n_agents in enumerate([2, 3]):
+        for i, n_discr in enumerate([2, 3, 4, 5]):
+
+            n_actions = [n_discr] * n_agents
+
+            # import data
+            df = pd.read_csv(
+                f"{PATH_TO_DATA}random_learning/{learner}_random_matrix_game_uniform_{n_agents}_{n_discr}.csv"
+            )
+            df = prepare_data(df, include_seed=True)
+
+            # visualize
+            ax.plot(
+                df["potentialness"],
+                df["convergence"],
+                linewidth=2,
+                color=COLORS[j],
+                linestyle=LS[i],
+                zorder=3 - j,
+            )
+
+    # create legend
+    line_styles = [
+        plt.Line2D([0], [0], color="black", linestyle=LS[i], linewidth=1.5, label=i + 2)
+        for i in range(4)
+    ]
+    color_styles = [
+        plt.Line2D([0], [0], color=COLORS[j], linestyle="-", linewidth=2, label=j + 2)
+        for j in range(2)
+    ]
+    legend1 = ax.legend(
+        handles=line_styles, loc=5, frameon=False, fontsize=FONTSIZE_LEGEND
+    )
+    legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
+    legend2 = ax.legend(
+        handles=color_styles, loc=6, frameon=False, fontsize=FONTSIZE_LEGEND
+    )
+    legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
+
+    # Display both legends on the plot
+    ax.add_artist(legend1)
+    ax.add_artist(legend2)
+
+    path_save = os.path.join(PATH_TO_RESULTS, "random_learning_line")
+    fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+
+
 if __name__ == "__main__":
     os.makedirs(os.path.join(PATH_TO_RESULTS), exist_ok=True)
     # generate_plot_learning_random([2, 3], [2, 3, 4, 5])
-    generate_plot_learning_econ_games(
-        n_agents=2, n_discr=11, interval=(0.00, 0.95), n_bins=25
-    )
+    plot_econ_games_scatter(n_agents=2, n_discr=11, interval=(0.00, 0.95), n_bins=25)
+    plot_random_games_line()

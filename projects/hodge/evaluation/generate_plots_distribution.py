@@ -20,6 +20,7 @@ def set_axis(xlim, ylim, title, xlabel: str = "", ylabel: str = ""):
     ax.set_title(title, fontsize=FONTSIZE_TITLE)
     return fig, ax
 
+
 def plot_distribution_potentialness():
     """plot of distribution of potentialness for randomly generated games"""
     # Parameter
@@ -43,6 +44,23 @@ def plot_distribution_potentialness():
                 linestyle=LS[i],
                 zorder=3 - j,
             )
+
+    # special games
+    ax.axvline(
+        x=0.3660,
+        color=COLORS[0],
+        linestyle=LS[1],
+        linewidth=1,
+    )
+    ax.text(
+        x=0.32,
+        y=0.2,
+        s="Shapley Game",
+        color=COLORS[0],
+        horizontalalignment="left",
+        verticalalignment="bottom",
+        rotation=90,
+    )
 
     # create legend
     line_styles = [
@@ -70,13 +88,14 @@ def plot_distribution_potentialness():
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
 
-def plot_distribution_psne():
-    """plot distribution of pure strict Nash equilibria (psne) w.r.t. potentialness for randomly generated games"""
+def plot_distribution_spne():
+    """plot distribution of strict pure Nash equilibria (spne) w.r.t. potentialness for randomly generated games"""
     # Parameter
-    n_bins = 20
+    n_bins = 25
     distribution = "uniform"
-    fig, ax = set_axis((0, 1), (-0.001, 1.001), "", "Potentialness", "Existence PSNE")
-
+    fig, ax = set_axis(
+        (0, 1), (-0.001, 1.001), "", "Potentialness", "Fraction of Games with SPNE"
+    )
 
     # plot data
     for j, n_agents in enumerate([2, 3]):
@@ -87,14 +106,16 @@ def plot_distribution_psne():
 
             # prepare data (group by potentialness and probability of strict NE)
             df["bin"] = map_potentialness_to_bin(df["potentialness"], n_bins)
-            df["psne"] = df["n_strict_ne"] > 0
-            df = df.groupby(["bin"]).agg({"psne": "mean"}).reset_index() 
-            df["potentialness"] = [ map_bin_to_potentialness(b, n_bins) for b in df["bin"]]
+            df["spne"] = df["n_strict_ne"] > 0
+            df = df.groupby(["bin"]).agg({"spne": "mean"}).reset_index()
+            df["potentialness"] = [
+                map_bin_to_potentialness(b, n_bins) for b in df["bin"]
+            ]
 
             # visualize
             ax.plot(
                 df["potentialness"],
-                df["psne"],
+                df["spne"],
                 linewidth=2,
                 color=COLORS[j],
                 linestyle=LS[i],
@@ -122,13 +143,12 @@ def plot_distribution_psne():
     # Display both legends on the plot
     ax.add_artist(legend1)
     ax.add_artist(legend2)
-    
-    path_save = os.path.join(PATH_TO_RESULTS, "random_psne")
-    fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
+    path_save = os.path.join(PATH_TO_RESULTS, "random_spne")
+    fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
 
 if __name__ == "__main__":
     os.makedirs(os.path.join(PATH_TO_RESULTS), exist_ok=True)
     plot_distribution_potentialness()
-    plot_distribution_psne()
+    plot_distribution_spne()
