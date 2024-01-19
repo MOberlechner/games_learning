@@ -15,6 +15,7 @@ class EconGame(MatrixGame):
         n_discr: int,
         interval: Tuple[float] = (0.0, 1.0),
     ):
+        self.agents = list(range(n_agents))
         payoff_matrix = self.create_payoff_matrix(n_agents, n_discr, interval)
         super().__init__(n_agents=n_agents, payoff_matrix=payoff_matrix)
         self.name = "econgame"
@@ -190,3 +191,45 @@ class Cournot(EconGame):
     def price(self, action_profile: np.ndarray) -> float:
         """Compute price given quantities (actions) of firms (agents)"""
         return np.maximum(self.a - (np.array(self.b) * action_profile).sum(), 0.0)
+
+
+class BertrandLinear(EconGame):
+    """Bertrand Competition with linear demand (Hansen et al., 2021)"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        alpha: Tuple[float],
+        beta: Tuple[float],
+        gamma: float,
+        cost: Tuple[float],
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+
+        self.alpha = np.array(alpha)
+        self.beta = np.array(beta)
+        self.gamma = gamma
+        self.cost = np.array(cost)
+
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "bertrand_linear"
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for Bertrand Competition with linear demand"""
+        return self.demand(action_profile) * (action_profile - self.cost)
+
+    def demand(self, action_profile: np.ndarray) -> np.ndarray:
+        """Compute demand for each agent given the prices (actions) of firms (agents)"""
+        return (
+            self.alpha
+            - self.beta * action_profile
+            + self.gamma
+            * np.array(
+                [self.sum_prices_opponents(action_profile, i) for i in self.agents]
+            )
+        )
+
+    def sum_prices_opponents(self, action_profile: np.ndarray, agent: int) -> float:
+        """Compute sum of prices of all agents except for agent (index)"""
+        return action_profile[:agent].sum() + action_profile[agent + 1 :].sum()
