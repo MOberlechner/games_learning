@@ -1,9 +1,13 @@
+import multiprocessing
 import os
+import sys
 from collections import deque
 from datetime import datetime
-from itertools import product
+from functools import partial
+from itertools import chain, product
 from typing import List
 
+import numpy as np
 import pandas as pd
 from decomposition.game import Game
 from tqdm import tqdm
@@ -51,37 +55,6 @@ def run_matrix_potentialness():
 
     # save results
     save_result(data, "matrix_games", f"potentialness.csv", PATH_TO_DATA)
-
-
-def run_random_potentialness(
-    actions: List[int], n_samples: int, distribution: str, compute_equil: bool = False
-):
-    """create random games and check potentialness"""
-    data = deque()
-    hodge = Game(actions, save_load=False)
-    n_agents = len(actions)
-
-    for seed in tqdm(range(n_samples)):
-        game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
-        hodge.compute_decomposition_matrix(game.payoff_matrix)
-        potentialness = hodge.metric
-        result = {
-            "seed": seed,
-            "potentialness": potentialness,
-        }
-        if compute_equil:
-            pure_equil = find_pure_nash_equilibrium(game)
-            equilibria = {
-                "n_weak_ne": len(pure_equil["weak_ne"]),
-                "n_strict_ne": len(pure_equil["strict_ne"]),
-            }
-            result.update(equilibria)
-
-        # log result
-        data.append(result)
-
-    # save results
-    save_result(data, "random", f"{distribution}_{actions}.csv", PATH_TO_DATA)
 
 
 def run_econgames_potentialness(
@@ -134,17 +107,84 @@ def run_econgames_potentialness(
     save_result(data, "econgames", f"potentialness.csv", PATH_TO_DATA, overwrite=False)
 
 
+def run_random_potentialness(
+    seeds: List[int], actions: List[int], distribution: str, compute_equil: bool = False
+):
+    """create random games and check potentialness"""
+    data = deque()
+    hodge = Game(actions, save_load=False)
+    n_agents = len(actions)
+
+    for seed in tqdm(seeds):
+        game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
+        hodge.compute_decomposition_matrix(game.payoff_matrix)
+        potentialness = hodge.metric
+        result = {
+            "seed": seed,
+            "potentialness": potentialness,
+        }
+        if compute_equil:
+            pure_equil = find_pure_nash_equilibrium(game)
+            equilibria = {
+                "n_weak_ne": len(pure_equil["weak_ne"]),
+                "n_strict_ne": len(pure_equil["strict_ne"]),
+            }
+            result.update(equilibria)
+
+        # log result
+        data.append(result)
+
+    return data
+
+
+def run_random_potentialness_mp(
+    actions: List[int],
+    n_samples: int,
+    distribution: str,
+    compute_equil: bool = False,
+    num_processes: int = 1,
+):
+    if num_processes > multiprocessing.cpu_count():
+        print(f"Only {multiprocessing.cpu_count()} process available")
+        num_processes = multiprocessing.cpu_count()
+
+    # create function that runs in parallel
+    func = partial(
+        run_random_potentialness,
+        actions=actions,
+        distribution=distribution,
+        compute_equil=compute_equil,
+    )
+
+    # create seeds for different processes
+    n_seeds = n_samples // num_processes + 1
+    seeds = [
+        list(range(i * n_seeds, min((i + 1) * n_seeds, n_samples)))
+        for i in range(num_processes)
+    ]
+
+    with multiprocessing.Pool(processes=num_processes) as pool:
+        results = pool.map(func, seeds)
+
+    # save results
+    data = deque(chain.from_iterable(list_of_deques))
+    save_result(data, "random", f"{distribution}_{actions}.csv", PATH_TO_DATA)
+
+
 if __name__ == "__main__":
 
-    # for n_agents in [2, 3]:
-    #     for n_actions in [2, 3, 4, 5]:
-    #         run_random_potentialness(
-    #             actions=[n_actions] * n_agents,
-    #             n_samples=1_000_000,
-    #             distribution="uniform",
-    #             compute_equil=True,
-    #         )
+    # compute potentialness for random games
+    for n_agents in [2]:
+        for n_actions in [15, 20]:
+            run_random_potentialness_mp(
+                actions=[n_actions] * n_agents,
+                n_samples=100_000,
+                distribution="uniform",
+                compute_equil=True,
+                num_processes=5,
+            )
 
+    # compute potentialness for econcames
     list_actions = [
         [5, 5],
         [8, 8],
@@ -155,4 +195,4 @@ if __name__ == "__main__":
         [5, 5, 5],
         [8, 8, 8],
     ]
-    run_econgames_potentialness(list_actions, interval=(0.05, 0.95), compute_equil=True)
+    # run_econgames_potentialness(list_actions, interval=(0.05, 0.95), compute_equil=True)
