@@ -167,21 +167,21 @@ def run_random_potentialness_mp(
         results = pool.map(func, seeds)
 
     # save results
-    data = deque(chain.from_iterable(list_of_deques))
+    data = deque(chain.from_iterable(results))
     save_result(data, "random", f"{distribution}_{actions}.csv", PATH_TO_DATA)
 
 
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [2]:
-        for n_actions in [15, 20]:
+    for n_agents in [2, 3, 4, 5]:
+        for n_actions in [2, 3]:
             run_random_potentialness_mp(
                 actions=[n_actions] * n_agents,
                 n_samples=100_000,
                 distribution="uniform",
                 compute_equil=True,
-                num_processes=5,
+                num_processes=6,
             )
 
     # compute potentialness for econcames
