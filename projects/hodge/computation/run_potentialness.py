@@ -114,7 +114,7 @@ def run_random_potentialness(
     data = deque()
     hodge = Game(
         actions, 
-        save_load=True, 
+        save_load=False, 
         path="/home/matthias/Git/MOberlechner/matrix_game_learning/projects/hodge/data/"
     )
     n_agents = len(actions)
@@ -190,13 +190,15 @@ def run_random_potentialness_mp(
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [10, 12]:
+    for n_agents in [2, 4, 8, 12]:
         for n_actions in [2]:
+            actions=[n_actions] * n_agents,
+            print(f"Experiment: {actions}")
             run_random_potentialness_mp(
-                actions=[n_actions] * n_agents,
-                n_samples=100_000,
+                actions=actions,
+                n_samples=1_000_000,
                 distribution="uniform",
-                compute_equil=False,
+                compute_equil=True,
                 flow=True,
                 num_processes=5,
             )
