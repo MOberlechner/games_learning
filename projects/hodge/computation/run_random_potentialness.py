@@ -22,16 +22,11 @@ from projects.hodge.util import save_result
 
 
 def run_random_potentialness(
-    seeds: List[int], actions: List[int], distribution: str, compute_equil: bool = False, flow: bool = False
+    seeds: List[int], hodge: Game, actions: List[int], distribution: str, compute_equil: bool = False, flow: bool = False
 ):
     """create random games and check potentialness"""
     data = deque()
-    hodge = Game(
-        actions, 
-        save_load=False, 
-        path="/home/matthias/Git/MOberlechner/matrix_game_learning/projects/hodge/data/"
-    )
-    n_agents = len(actions)
+    n_agents = hodge.n_agents
 
     for seed in tqdm(seeds):
         game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
@@ -76,9 +71,16 @@ def run_random_potentialness_mp(
         print(f"Only {multiprocessing.cpu_count()} process available")
         num_processes = multiprocessing.cpu_count()
 
+    # create game (structure)
+    hodge = Game(
+        actions, 
+        save_load=False,
+    )
+
     # create function that runs in parallel
     func = partial(
         run_random_potentialness,
+        hodge=hodge,
         actions=actions,
         distribution=distribution,
         compute_equil=compute_equil,
