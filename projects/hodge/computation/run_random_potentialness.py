@@ -7,6 +7,8 @@ from functools import partial
 from itertools import chain, product
 from typing import List
 
+sys.path.append(os.path.realpath("/home/oberlechner/code/matrix_game_learning"))
+
 import numpy as np
 import pandas as pd
 from decomposition.game import Game
@@ -22,14 +24,18 @@ from projects.hodge.util import save_result
 
 
 def run_random_potentialness(
-    seeds: List[int], actions: List[int], distribution: str, compute_equil: bool = False, flow: bool = False
+    seeds: List[int],
+    actions: List[int],
+    distribution: str,
+    compute_equil: bool = False,
+    flow: bool = False,
 ):
     """create random games and check potentialness"""
     data = deque()
     hodge = Game(
-        actions, 
-        save_load=False, 
-        path="/home/matthias/Git/MOberlechner/matrix_game_learning/projects/hodge/data/"
+        actions,
+        save_load=False,
+        path="/home/matthias/Git/MOberlechner/matrix_game_learning/projects/hodge/data/",
     )
     n_agents = len(actions)
 
@@ -82,7 +88,7 @@ def run_random_potentialness_mp(
         actions=actions,
         distribution=distribution,
         compute_equil=compute_equil,
-        flow = flow,
+        flow=flow,
     )
 
     # create seeds for different processes
@@ -106,7 +112,7 @@ if __name__ == "__main__":
     # compute potentialness for random games
     for n_agents in [12]:
         for n_actions in [2]:
-            actions=[n_actions] * n_agents
+            actions = [n_actions] * n_agents
             print(f"Experiment: {actions}")
             run_random_potentialness_mp(
                 actions=actions,
