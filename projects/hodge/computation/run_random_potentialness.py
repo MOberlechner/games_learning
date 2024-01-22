@@ -24,7 +24,12 @@ from projects.hodge.util import save_result
 
 
 def run_random_potentialness(
-    seeds: List[int], hodge: Game, actions: List[int], distribution: str, compute_equil: bool = False, flow: bool = False
+    seeds: List[int],
+    hodge: Game,
+    actions: List[int],
+    distribution: str,
+    compute_equil: bool = False,
+    flow: bool = False,
 ):
     """create random games and check potentialness"""
     data = deque()
@@ -75,7 +80,7 @@ def run_random_potentialness_mp(
 
     # create game (structure)
     hodge = Game(
-        actions, 
+        actions,
         save_load=False,
     )
 
@@ -108,7 +113,7 @@ def run_random_potentialness_mp(
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [12]:
+    for n_agents in [10]:
         for n_actions in [2]:
             actions = [n_actions] * n_agents
             print(f"Experiment: {actions}")
