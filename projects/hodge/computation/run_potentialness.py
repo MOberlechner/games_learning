@@ -108,21 +108,34 @@ def run_econgames_potentialness(
 
 
 def run_random_potentialness(
-    seeds: List[int], actions: List[int], distribution: str, compute_equil: bool = False
+    seeds: List[int], actions: List[int], distribution: str, compute_equil: bool = False, flow: bool = False
 ):
     """create random games and check potentialness"""
     data = deque()
-    hodge = Game(actions, save_load=False)
+    hodge = Game(
+        actions, 
+        save_load=True, 
+        path="/home/matthias/Git/MOberlechner/matrix_game_learning/projects/hodge/data/"
+    )
     n_agents = len(actions)
 
     for seed in tqdm(seeds):
         game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
-        hodge.compute_decomposition_matrix(game.payoff_matrix)
-        potentialness = hodge.metric
-        result = {
-            "seed": seed,
-            "potentialness": potentialness,
-        }
+        if flow:
+            hodge.compute_flow_decomposition_matrix(game.payoff_matrix)
+            potentialness = hodge.flow_metric
+            result = {
+                "seed": seed,
+                "potentialness_flow": potentialness,
+            }
+        else:
+            hodge.compute_decomposition_matrix(game.payoff_matrix)
+            potentialness = hodge.metric
+            result = {
+                "seed": seed,
+                "potentialness": potentialness,
+            }
+
         if compute_equil:
             pure_equil = find_pure_nash_equilibrium(game)
             equilibria = {
@@ -142,6 +155,7 @@ def run_random_potentialness_mp(
     n_samples: int,
     distribution: str,
     compute_equil: bool = False,
+    flow: bool = False,
     num_processes: int = 1,
 ):
     if num_processes > multiprocessing.cpu_count():
@@ -154,6 +168,7 @@ def run_random_potentialness_mp(
         actions=actions,
         distribution=distribution,
         compute_equil=compute_equil,
+        flow = flow,
     )
 
     # create seeds for different processes
@@ -168,20 +183,22 @@ def run_random_potentialness_mp(
 
     # save results
     data = deque(chain.from_iterable(results))
-    save_result(data, "random", f"{distribution}_{actions}.csv", PATH_TO_DATA)
+    dir = "random_flow" if flow else "random"
+    save_result(data, dir, f"{distribution}_{actions}.csv", PATH_TO_DATA)
 
 
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [2, 3, 4, 5]:
-        for n_actions in [2, 3]:
+    for n_agents in [10, 12]:
+        for n_actions in [2]:
             run_random_potentialness_mp(
                 actions=[n_actions] * n_agents,
                 n_samples=100_000,
                 distribution="uniform",
-                compute_equil=True,
-                num_processes=6,
+                compute_equil=False,
+                flow=True,
+                num_processes=5,
             )
 
     # compute potentialness for econcames
