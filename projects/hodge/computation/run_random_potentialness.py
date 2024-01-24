@@ -128,7 +128,8 @@ if __name__ == "__main__":
     # compute potentialness for random games
     settings = [
         (2, 2),
-        (2, 3)(2, 4),
+        (2, 3),
+        (2, 4),
         (2, 5),
         (2, 12),
         (2, 24),
