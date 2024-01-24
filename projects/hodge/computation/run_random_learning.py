@@ -26,12 +26,13 @@ def get_seeds(
     n_bins: int,
     n_seeds_per_bin: int,
     distribution: str = "uniform",
+    dir: str = "random",
 ):
     """determine seeds to get n_seeds games for different levels of potentialness"""
 
     # import logfile from run_random experiment
     file_name = f"{distribution}_{[n_actions]*n_agents}.csv"
-    path = os.path.join(PATH_TO_DATA, "random", file_name)
+    path = os.path.join(PATH_TO_DATA, dir, file_name)
     if not os.path.exists(path):
         print(
             f"File not found ({path})\nYou might have to run the corresponding experiment ,i.e., run_random.py, first"
@@ -39,7 +40,8 @@ def get_seeds(
         return []
     # match potentialness to bins
     tmp = pd.read_csv(path)
-    tmp["bin"] = map_potentialness_to_bin(tmp.potentialness, n_bins)
+    metric = "potentialness" if "potentialness" in tmp.columns else "potentialness_flow"
+    tmp["bin"] = map_potentialness_to_bin(tmp[metric], n_bins)
 
     # get seeds for different levels of potentialness
     seeds = []
@@ -58,9 +60,9 @@ def run_learning_stepsizes(
     n_bins,
     n_samples_per_bin: int,
     n_runs: int,
-    list_eta: list,
-    list_beta: list,
+    init: str,
     distribution: str,
+    dir: str,
 ):
     """Apply learning to random games.
     To get games with evenly distributed potentialness, we take some of the sampled games from the previous experiment for different levels of potentialness.
@@ -72,22 +74,22 @@ def run_learning_stepsizes(
         n_bins (int): divide [0, 1] in equally sized bins
         n_samples_per_bin (int): number of sampled games with potentialness (from subinterval, i.e., bin)
         n_runs (int): number of runs per game
-        list_eta, list_beta (list, list): possible parameters for learning parameters (eta, beta)
+        init (str): initialization of strategy
         distribution (str): distribution of random utiltities
+        dir (str): directory to sampled games (from run_random_potentialness.py)
     """
     print(f"Run Experiment for {n_agents} agents and {n_actions} actions:")
 
     # get seeds which give us equally many games for all levels of potentialness
-    seeds = get_seeds(n_actions, n_agents, n_bins, n_samples_per_bin, distribution)
+    seeds = get_seeds(n_actions, n_agents, n_bins, n_samples_per_bin, distribution, dir)
     data = deque()
 
     for seed, bin in tqdm(seeds):
-        game = RandomMatrixGame(
-            n_agents, [n_actions] * n_agents, seed=seed, distribution=distribution
-        )
+        actions = [n_actions] * n_agents
+        game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
 
         for run in range(N_RUNS):
-            init_strat = game.init_strategies("random")
+            init_strat = game.init_strategies(init)
 
             for eta, beta in product(LIST_ETA, LIST_BETA):
                 learner = MirrorAscent(eta=eta, beta=beta, mirror_map="entropic")
@@ -109,31 +111,51 @@ def run_learning_stepsizes(
                     }
                 )
                 data.append(result)
-    if len(seed) > 0:
+
+                if result["convergence"]:
+                    break
+
+    if len(seeds) > 0:
         # save results
-        filename = (
-            f"{learner.name}_{game.name}_{distribution}_{n_agents}_{n_actions}.csv"
-        )
-        save_result(data, "random_learning", filename, PATH_TO_DATA)
+        filename = f"{learner.name}_{game.name}_{distribution}_{actions}.csv"
+        save_result(data, "random_learning_equal", filename, PATH_TO_DATA)
     else:
         print(" -> Not enough settings found")
 
 
 if __name__ == "__main__":
+    N_RUNS = 1
     n_bins = 25
     n_samples_per_bin = 100
     distribution = "uniform"
+    dir = "random_flow_1e5"
+    init = "equal"
 
-    for n_agents in [2, 3]:
-        for n_actions in [2, 3, 4, 5]:
-            # try different parameters for stepsize
-            run_learning_stepsizes(
-                n_agents,
-                n_actions,
-                n_bins,
-                n_samples_per_bin,
-                N_RUNS,
-                LIST_ETA,
-                LIST_BETA,
-                distribution,
-            )
+    settings = [
+        (2, 2),
+        (2, 3),
+        (2, 4),
+        (2, 5),
+        (2, 12),
+        (2, 24),
+        (3, 2),
+        (3, 3),
+        (3, 4),
+        (3, 5),
+        (4, 2),
+        (4, 4),
+        (8, 2),
+        (10, 2),
+    ]
+
+    for n_agents, n_actions in settings:
+        run_learning_stepsizes(
+            n_agents,
+            n_actions,
+            n_bins,
+            n_samples_per_bin,
+            N_RUNS,
+            init,
+            distribution,
+            dir,
+        )
