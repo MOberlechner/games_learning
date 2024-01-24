@@ -31,7 +31,7 @@ def run_random_potentialness(
     compute_equil: bool = False,
     flow: bool = False,
 ):
-    """create random games and check potentialness"""
+    """Subroutine for method below"""
     data = deque()
     n_agents = hodge.n_agents
 
@@ -70,12 +70,26 @@ def run_random_potentialness_mp(
     actions: List[int],
     n_samples: int,
     distribution: str,
+    dir: str,
     compute_equil: bool = False,
     flow: bool = False,
     num_processes: int = 1,
 ):
+    """Sample random games and compute potentialness (and equilibria)
+    Note that multiprocessing only useful for smaller settings
+
+    Args:
+        actions (List[int]): setting, e.g. [3, 3] = 2 agents with 3 actions
+        n_samples (int): number of samples
+        distribution (str): distribution of generated payoff entries
+        dir (str): directory to save results
+        compute_equil (bool, optional): compute pure equilibria. Defaults to False.
+        flow (bool, optional): use flow decomposition (faster). Defaults to False.
+        num_processes (int, optional): number of processes. Defaults to 1.
+    """
+
     if num_processes > multiprocessing.cpu_count():
-        print(f"Only {multiprocessing.cpu_count()} process available")
+        print(f"Only {multiprocessing.cpu_count()} cpus available")
         num_processes = multiprocessing.cpu_count()
 
     # create game (structure)
@@ -106,22 +120,22 @@ def run_random_potentialness_mp(
 
     # save results
     data = deque(chain.from_iterable(results))
-    dir = "random_flow" if flow else "random"
     save_result(data, dir, f"{distribution}_{actions}.csv", PATH_TO_DATA)
 
 
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [10]:
-        for n_actions in [2]:
+    for n_agents in [2]:
+        for n_actions in [24]:
             actions = [n_actions] * n_agents
             print(f"Experiment: {actions}")
             run_random_potentialness_mp(
                 actions=actions,
-                n_samples=1_000_000,
+                n_samples=100_000,
                 distribution="uniform",
+                dir="random_flow_1e5",
                 compute_equil=True,
                 flow=True,
-                num_processes=8,
+                num_processes=3,
             )
