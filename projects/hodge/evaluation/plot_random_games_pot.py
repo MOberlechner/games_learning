@@ -83,34 +83,8 @@ def plot_distribution_potentialness(list_n_agents, list_n_actions, name, dir):
             rotation=90,
         )
 
-    # create legend
-    line_styles = [
-        plt.Line2D(
-            [0], [0], color="black", linestyle=LS[j], linewidth=1.5, label=n_actions
-        )
-        for j, n_actions in enumerate(list_n_actions)
-    ]
-    color_styles = [
-        plt.Line2D(
-            [0],
-            [0],
-            color=get_colors(i, len(list_n_agents)),
-            linestyle="-",
-            linewidth=2,
-            label=n_agents,
-        )
-        for i, n_agents in enumerate(list_n_agents)
-    ]
-    legend1 = ax.legend(
-        handles=line_styles, loc=5, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
-    legend2 = ax.legend(
-        handles=color_styles, loc=6, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
-
-    # Display both legends on the plot
+    # add legends
+    legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions)
     ax.add_artist(legend1)
     ax.add_artist(legend2)
 
@@ -163,34 +137,8 @@ def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
             except:
                 print(f"Setting {[n_actions]*n_agents} not available (path:{path})")
 
-    # create legend
-    line_styles = [
-        plt.Line2D(
-            [0], [0], color="black", linestyle=LS[j], linewidth=1.5, label=n_actions
-        )
-        for j, n_actions in enumerate(list_n_actions)
-    ]
-    color_styles = [
-        plt.Line2D(
-            [0],
-            [0],
-            color=get_colors(i, len(list_n_agents)),
-            linestyle="-",
-            linewidth=2,
-            label=n_agents,
-        )
-        for i, n_agents in enumerate(list_n_agents)
-    ]
-    legend1 = ax.legend(
-        handles=line_styles, loc=5, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
-    legend2 = ax.legend(
-        handles=color_styles, loc=6, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
-
-    # Display both legends on the plot
+    # add legends
+    legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions)
     ax.add_artist(legend1)
     ax.add_artist(legend2)
 
@@ -254,34 +202,8 @@ def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
     plt.axhline(y=1 - 1 / np.exp(1), color="k", linestyle="--", linewidth=0.7)
     plt.text(y=1 - 1 / np.exp(1) - 0.05, x=0.8, s=r"$1-\dfrac{1}{e}$", fontsize=8)
 
-    # create legend
-    line_styles = [
-        plt.Line2D(
-            [0], [0], color="black", linestyle=LS[j], linewidth=1.5, label=n_actions
-        )
-        for j, n_actions in enumerate(list_n_actions)
-    ]
-    color_styles = [
-        plt.Line2D(
-            [0],
-            [0],
-            color=get_colors(i, len(list_n_agents)),
-            linestyle="-",
-            linewidth=2,
-            label=n_agents,
-        )
-        for i, n_agents in enumerate(list_n_agents)
-    ]
-    legend1 = ax.legend(
-        handles=line_styles, loc=4, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
-    legend2 = ax.legend(
-        handles=color_styles, loc=3, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
-
-    # Display both legends on the plot
+    # add legends
+    legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions)
     ax.add_artist(legend1)
     ax.add_artist(legend2)
 
