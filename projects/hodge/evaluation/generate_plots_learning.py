@@ -161,64 +161,57 @@ def plot_random_games_scatter(list_agents, list_actions, n_bins=20):
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
 
-def plot_random_games_line():
+def plot_learning_line(list_n_agents, list_n_actions, name, dir):
 
     # Parameter
     n_bins = 25
     distribution = "uniform"
     learner = "mirror_ascent(entropic)"
-    fig, ax = set_axis((0, 1), (-0.001, 1.001), "", "Potentialness", "P(Convergence)")
+    fig, ax = set_axis(
+        (0, 1), (-0.001, 1.001), "", "Potentialness", "P(Convergence | SPNE exists)"
+    )
 
     # plot data
-    for j, n_agents in enumerate([2, 3]):
-        for i, n_discr in enumerate([2, 3, 4, 5]):
+    for i, n_agents in enumerate(list_n_agents):
+        for j, n_discr in enumerate(list_n_actions):
 
-            n_actions = [n_discr] * n_agents
+            actions = [n_discr] * n_agents
+            file_name = f"{learner}_random_matrix_game_uniform_{actions}.csv"
+            path = os.path.join(PATH_TO_DATA, dir, file_name)
 
-            # import data
-            df = pd.read_csv(
-                f"{PATH_TO_DATA}random_learning/{learner}_random_matrix_game_uniform_{n_agents}_{n_discr}.csv"
-            )
-            df = prepare_data(df, include_seed=True)
+            try:
+                # import data
+                df = pd.read_csv(path)
+                df = prepare_data(df, include_seed=True)
 
-            # visualize
-            ax.plot(
-                df["potentialness"],
-                df["convergence"],
-                linewidth=2,
-                color=COLORS[j],
-                linestyle=LS[i],
-                zorder=3 - j,
-            )
+                # visualize
+                ax.plot(
+                    df["potentialness"],
+                    df["convergence"],
+                    linewidth=2,
+                    color=get_colors(i, len(list_n_agents)),
+                    linestyle=LS[j],
+                    zorder=i,
+                )
+            except Exception as e:
+                print(e)
 
-    # create legend
-    line_styles = [
-        plt.Line2D([0], [0], color="black", linestyle=LS[i], linewidth=1.5, label=i + 2)
-        for i in range(4)
-    ]
-    color_styles = [
-        plt.Line2D([0], [0], color=COLORS[j], linestyle="-", linewidth=2, label=j + 2)
-        for j in range(2)
-    ]
-    legend1 = ax.legend(
-        handles=line_styles, loc=5, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
-    legend2 = ax.legend(
-        handles=color_styles, loc=6, frameon=False, fontsize=FONTSIZE_LEGEND
-    )
-    legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
-
-    # Display both legends on the plot
+    # add legends
+    legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions)
     ax.add_artist(legend1)
     ax.add_artist(legend2)
 
-    path_save = os.path.join(PATH_TO_RESULTS, "random_learning_line")
+    path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
 
 
 if __name__ == "__main__":
     os.makedirs(os.path.join(PATH_TO_RESULTS), exist_ok=True)
     # generate_plot_learning_random([2, 3], [2, 3, 4, 5])
-    plot_econ_games_scatter(n_agents=2, n_discr=11, interval=(0.00, 0.95), n_bins=25)
-    plot_random_games_line()
+    # plot_econ_games_scatter(n_agents=2, n_discr=11, interval=(0.00, 0.95), n_bins=25)
+    plot_learning_line(
+        list_n_agents=[2, 4, 8, 10],
+        list_n_actions=[2, 4, 12, 24],
+        name="random_learning_fixed_init",
+        dir="random_learning_equal",
+    )
