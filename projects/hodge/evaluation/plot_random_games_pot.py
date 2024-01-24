@@ -203,7 +203,7 @@ def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
     plt.text(y=1 - 1 / np.exp(1) - 0.05, x=0.8, s=r"$1-\dfrac{1}{e}$", fontsize=8)
 
     # add legends
-    legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions)
+    legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions, position=(4, 3))
     ax.add_artist(legend1)
     ax.add_artist(legend2)
 

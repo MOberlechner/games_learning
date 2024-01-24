@@ -44,7 +44,7 @@ def get_colors(i, n):
         return cmap(idx / (n - 1))
 
 
-def create_legend(ax, list_n_agents, list_n_actions):
+def create_legend(ax, list_n_agents, list_n_actions, position=(5, 6)):
     # create legend
     line_styles = [
         plt.Line2D(
@@ -64,11 +64,11 @@ def create_legend(ax, list_n_agents, list_n_actions):
         for i, n_agents in enumerate(list_n_agents)
     ]
     legend1 = ax.legend(
-        handles=line_styles, loc=5, frameon=False, fontsize=FONTSIZE_LEGEND
+        handles=line_styles, loc=position[0], frameon=False, fontsize=FONTSIZE_LEGEND
     )
     legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
     legend2 = ax.legend(
-        handles=color_styles, loc=6, frameon=False, fontsize=FONTSIZE_LEGEND
+        handles=color_styles, loc=position[1], frameon=False, fontsize=FONTSIZE_LEGEND
     )
     legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
     return (
