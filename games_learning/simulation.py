@@ -95,7 +95,12 @@ class Simulator:
             "utility_loss": np.max(
                 [self.log_data["utility_loss"][i][-1] for i in self.agents]
             ),
-            "min_utility_loss": np.max(
-                [min(self.log_data["utility_loss"][i]) for i in self.agents]
+            "min_utility_loss": np.min(
+                [
+                    np.max(
+                        [min(self.log_data["utility_loss"][i][t]) for i in self.agents]
+                    )
+                    for t in range(self.number_iter)
+                ]
             ),
         }

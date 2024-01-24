@@ -7,6 +7,8 @@ from functools import partial
 from itertools import chain, product
 from typing import List
 
+sys.path.append(os.path.realpath("/home/oberlechner/code/matrix_game_learning"))
+
 import numpy as np
 import pandas as pd
 from decomposition.game import Game
@@ -124,16 +126,31 @@ def run_random_potentialness_mp(
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [2]:
-        for n_actions in [24]:
-            actions = [n_actions] * n_agents
-            print(f"Experiment: {actions}")
-            run_random_potentialness_mp(
-                actions=actions,
-                n_samples=100_000,
-                distribution="uniform",
-                dir="random_flow_1e5",
-                compute_equil=True,
-                flow=True,
-                num_processes=3,
-            )
+    settings = [
+        (2, 2),
+        (2, 3),
+        (2, 4),
+        (2, 5),
+        (2, 12),
+        (2, 24),
+        (3, 2),
+        (3, 3),
+        (3, 4),
+        (3, 5),
+        (4, 2),
+        (4, 4),
+        (8, 2),
+        (10, 2),
+    ]
+    for n_agents, n_actions in settings:
+        actions = [n_actions] * n_agents
+        print(f"Experiment: {actions}")
+        run_random_potentialness_mp(
+            actions=actions,
+            n_samples=1_000_000,
+            distribution="uniform",
+            dir="random_flow_1e6",
+            compute_equil=True,
+            flow=True,
+            num_processes=4,
+        )
