@@ -252,7 +252,7 @@ def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
                 print(f"Setting {[n_actions]*n_agents} not available (path:{path})")
 
     plt.axhline(y=1 - 1 / np.exp(1), color="k", linestyle="--", linewidth=0.7)
-    plt.text(y=1 - 1 / np.exp(1) - 0.06, x=0.8, s=r"$1-\dfrac{1}{e}$")
+    plt.text(y=1 - 1 / np.exp(1) - 0.05, x=0.8, s=r"$1-\dfrac{1}{e}$", fontsize=8)
 
     # create legend
     line_styles = [
