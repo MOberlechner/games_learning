@@ -124,8 +124,8 @@ def run_random_potentialness_mp(
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    for n_agents in [3]:
-        for n_actions in [3]:
+    for n_agents in [2]:
+        for n_actions in [24]:
             actions = [n_actions] * n_agents
             print(f"Experiment: {actions}")
             run_random_potentialness_mp(
@@ -135,5 +135,5 @@ if __name__ == "__main__":
                 dir="random_flow_1e5",
                 compute_equil=True,
                 flow=True,
-                num_processes=1,
+                num_processes=3,
             )
