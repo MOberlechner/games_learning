@@ -44,33 +44,52 @@ def get_colors(i, n):
         return cmap(idx / (n - 1))
 
 
-def create_legend(ax, list_n_agents, list_n_actions, position=(5, 6)):
-    # create legend
-    line_styles = [
-        plt.Line2D(
-            [0], [0], color="black", linestyle=LS[j], linewidth=2, label=n_actions
-        )
-        for j, n_actions in enumerate(list_n_actions)
-    ]
+def create_legend(
+    ax,
+    list1,
+    list2,
+    position=(5, 6),
+    label1="# Agents",
+    label2="# Actions",
+    ncols1=1,
+    ncols2=2,
+):
+
+    # Legend 1
     color_styles = [
         plt.Line2D(
             [0],
             [0],
-            color=get_colors(i, len(list_n_agents)),
+            color=get_colors(i, len(list1)),
             linestyle="-",
             linewidth=2,
-            label=n_agents,
+            label=l1,
         )
-        for i, n_agents in enumerate(list_n_agents)
+        for i, l1 in enumerate(list1)
     ]
     legend1 = ax.legend(
-        handles=line_styles, loc=position[0], frameon=False, fontsize=FONTSIZE_LEGEND
+        handles=color_styles,
+        loc=position[0],
+        frameon=False,
+        fontsize=FONTSIZE_LEGEND,
+        ncol=ncols1,
     )
-    legend1.set_title("# Actions", prop={"size": FONTSIZE_LEGEND})
+    legend1.set_title(label1, prop={"size": FONTSIZE_LEGEND})
+
+    # Legend 2
+    line_styles = [
+        plt.Line2D([0], [0], color="black", linestyle=LS[j], linewidth=2, label=l2)
+        for j, l2 in enumerate(list2)
+    ]
     legend2 = ax.legend(
-        handles=color_styles, loc=position[1], frameon=False, fontsize=FONTSIZE_LEGEND
+        handles=line_styles,
+        loc=position[1],
+        frameon=False,
+        fontsize=FONTSIZE_LEGEND,
+        ncol=ncols2,
     )
-    legend2.set_title("# Agents", prop={"size": FONTSIZE_LEGEND})
+    legend2.set_title(label2, prop={"size": FONTSIZE_LEGEND})
+
     return (
         legend1,
         legend2,
