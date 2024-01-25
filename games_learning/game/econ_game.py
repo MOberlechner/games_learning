@@ -67,11 +67,14 @@ class FPSB(EconGame):
         self,
         n_agents: int,
         n_discr: int,
+        valuations: Tuple[float],
         interval: Tuple[float] = (0.0, 1.0),
     ):
-        self.valuation = np.ones(n_agents)
+        self.valuation = np.array(valuations)
         super().__init__(n_agents, n_discr, interval)
         self.name = "fpsb"
+
+        assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for FPSB"""
@@ -91,11 +94,14 @@ class SPSB(EconGame):
         self,
         n_agents: int,
         n_discr: int,
+        valuations: Tuple[float],
         interval: Tuple[float] = (0.0, 1.0),
     ):
-        self.valuation = np.ones(n_agents)
+        self.valuation = np.array(valuations)
         super().__init__(n_agents, n_discr, interval)
         self.name = "spsb"
+
+        assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for SPSB"""
@@ -108,6 +114,37 @@ class SPSB(EconGame):
         return allocation * (self.valuation - second_price)
 
 
+class AlphaSB(EconGame):
+    """Complete-Information Sealed Bid auction with mixture of first-and second-price payment rule"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        alpha: float,
+        n_discr: int,
+        valuations: Tuple[float],
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        self.valuation = np.array(valuations)
+        self.alpha = alpha
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "alpha_sb"
+
+        assert len(valuations) == n_agents
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for AlphaSB"""
+        # compute allocation
+        action_max = np.array(action_profile) == np.array(action_profile).max()
+        allocation = action_max / action_max.sum()
+        # compute payment
+        first_price = first_price = action_profile.max()
+        second_price = np.sort(action_profile)[-2]
+        payment = (1 - self.alpha) * first_price + self.alpha * second_price
+        # compute ex-post utility
+        return allocation * (self.valuation - payment)
+
+
 class AllPay(EconGame):
     """Complete-Information All-Pay Auction with random tie-breaking and fixed value v=1"""
 
@@ -115,11 +152,14 @@ class AllPay(EconGame):
         self,
         n_agents: int,
         n_discr: int,
+        valuations: Tuple[float],
         interval: Tuple[float] = (0.0, 1.0),
     ):
-        self.valuation = np.ones(n_agents)
+        self.valuation = np.array(valuations)
         super().__init__(n_agents, n_discr, interval)
         self.name = "allpay"
+
+        assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for All-Pay Auction"""
@@ -137,13 +177,16 @@ class Contest(EconGame):
         self,
         n_agents: int,
         n_discr: int,
+        valuations: Tuple[float],
         interval: Tuple[float] = (0.0, 1.0),
         csf_param: float = 1.0,
     ):
         self.csf_param = csf_param
-        self.valuation = np.ones(n_agents)
+        self.valuation = np.array(valuations)
         super().__init__(n_agents, n_discr, interval)
         self.name = "contest"
+
+        assert len(valuations) == n_agents
 
     def allocation(self, action_profile: np.ndarray) -> np.ndarray:
         """compute winning probabilities for Tullock-Contest"""
