@@ -133,25 +133,23 @@ def run_learning_stepsizes(
 
 
 if __name__ == "__main__":
-    n_runs = 1
+    n_runs = 20
     n_bins = 25
     n_samples_per_bin = 100
     distribution = "uniform"
     dir = "random_flow_1e6"
     dir_save = f"random_learning_{n_runs}run"
-    init = "equal"
+    init = "random"
 
     settings = [
         (2, 2),
-        (2, 3),
         (2, 4),
-        (2, 5),
         (2, 12),
         (2, 24),
-        (4, 2),
-        (4, 4),
-        (8, 2),
-        (10, 2),
+        # (4, 2),
+        # (4, 4),
+        # (8, 2),
+        # (10, 2),
     ]
 
     for n_agents, n_actions in settings:
