@@ -114,8 +114,8 @@ def run_learning_stepsizes(
                 )
                 data.append(result)
 
-                if result["convergence"]:
-                    break
+                # if result["convergence"]:
+                #    break
 
     if len(seeds) > 0:
         # save results
@@ -140,14 +140,14 @@ if __name__ == "__main__":
         (2, 5),
         (2, 12),
         (2, 24),
-        (3, 2),
-        (3, 3),
-        (3, 4),
-        (3, 5),
-        (4, 2),
-        (4, 4),
-        (8, 2),
-        (10, 2),
+        # (3, 2),
+        # (3, 3),
+        # (3, 4),
+        # (3, 5),
+        # (4, 2),
+        # (4, 4),
+        # (8, 2),
+        # (10, 2),
     ]
 
     for n_agents, n_actions in settings:

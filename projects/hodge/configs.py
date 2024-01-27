@@ -4,7 +4,7 @@ import matplotlib
 MAX_ITER = 2_000
 TOL = 1e-8
 N_RUNS = 100
-LIST_ETA = [2**i for i in [9, 6, 3, 0, -3]]
+LIST_ETA = [2**i for i in [8, 4, 0, -4]]
 LIST_BETA = [0.05, 0.5]
 
 
