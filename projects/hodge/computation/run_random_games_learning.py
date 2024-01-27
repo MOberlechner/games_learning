@@ -53,8 +53,9 @@ def get_seeds(
                 tmp.seed[tmp.bin == bin], replace=False, size=n_seeds_per_bin
             )
             seeds += [(s, bin) for s in seeds_bin]
-        else:
+        elif sum((tmp.bin == bin) & (tmp.n_strict_ne > 0)) >= 1:
             seeds_bin = tmp.seed[tmp.bin == bin]
+            seeds += [(s, bin) for s in seeds_bin]
     return seeds
 
 
@@ -132,21 +133,21 @@ def run_learning_stepsizes(
 
 
 if __name__ == "__main__":
-    n_runs = 20
+    n_runs = 1
     n_bins = 25
     n_samples_per_bin = 100
     distribution = "uniform"
     dir = "random_flow_1e6"
     dir_save = f"random_learning_{n_runs}run"
-    init = "random"
+    init = "equal"
 
     settings = [
-        # (2, 2),
-        # (2, 3),
-        # (2, 4),
-        # (2, 5),
-        # (2, 12),
-        # (2, 24),
+        (2, 2),
+        (2, 3),
+        (2, 4),
+        (2, 5),
+        (2, 12),
+        (2, 24),
         (4, 2),
         (4, 4),
         (8, 2),
