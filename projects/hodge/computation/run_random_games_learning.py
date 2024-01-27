@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+sys.path.append(os.path.realpath("/home/oberlechner/code/matrix_game_learning"))
+
 from games_learning.game.matrix_game import RandomMatrixGame
 from games_learning.learner.learner import MirrorAscent
 from games_learning.simulation import Simulator
