@@ -48,11 +48,13 @@ def get_seeds(
     # get seeds for different levels of potentialness
     seeds = []
     for bin in tmp.bin.unique():
-        if sum((tmp.bin == bin) & (tmp.n_strict_ne > 0)) >= 1:
+        if sum((tmp.bin == bin) & (tmp.n_strict_ne > 0)) >= n_seeds_per_bin:
             seeds_bin = np.random.choice(
                 tmp.seed[tmp.bin == bin], replace=False, size=n_seeds_per_bin
             )
             seeds += [(s, bin) for s in seeds_bin]
+        else:
+            seeds_bin = tmp.seed[tmp.bin == bin]
     return seeds
 
 
@@ -80,7 +82,9 @@ def run_learning_stepsizes(
         distribution (str): distribution of random utiltities
         dir (str): directory to sampled games (from run_random_potentialness.py)
     """
-    print(f"Run Experiment for {n_agents} agents and {n_actions} actions:")
+    print(
+        f"Run Experiment for {n_agents} agents and {n_actions} actions, {n_runs} runs and {init} initialization:"
+    )
 
     # get seeds which give us equally many games for all levels of potentialness
     seeds = get_seeds(n_actions, n_agents, n_bins, n_samples_per_bin, distribution, dir)
