@@ -94,7 +94,7 @@ def run_learning_stepsizes(
         actions = [n_actions] * n_agents
         game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
 
-        for run in range(N_RUNS):
+        for run in range(n_runs):
             init_strat = game.init_strategies(init)
 
             for eta, beta in product(LIST_ETA, LIST_BETA):
@@ -124,18 +124,18 @@ def run_learning_stepsizes(
     if len(seeds) > 0:
         # save results
         filename = f"{learner.name}_{game.name}_{distribution}_{actions}.csv"
-        save_result(data, "random_learning_20runs", filename, PATH_TO_DATA)
+        save_result(data, "random_learning_1run", filename, PATH_TO_DATA)
     else:
         print(" -> Not enough settings found")
 
 
 if __name__ == "__main__":
-    N_RUNS = 20
+    n_runs = 1
     n_bins = 25
     n_samples_per_bin = 100
     distribution = "uniform"
     dir = "random_flow_1e6"
-    init = "random"
+    init = "equal"
 
     settings = [
         (2, 2),
@@ -144,14 +144,14 @@ if __name__ == "__main__":
         (2, 5),
         (2, 12),
         (2, 24),
-        # (3, 2),
-        # (3, 3),
-        # (3, 4),
-        # (3, 5),
-        # (4, 2),
-        # (4, 4),
-        # (8, 2),
-        # (10, 2),
+        (3, 2),
+        (3, 3),
+        (3, 4),
+        (3, 5),
+        (4, 2),
+        (4, 4),
+        (8, 2),
+        (10, 2),
     ]
 
     for n_agents, n_actions in settings:
@@ -160,7 +160,7 @@ if __name__ == "__main__":
             n_actions,
             n_bins,
             n_samples_per_bin,
-            N_RUNS,
+            n_runs,
             init,
             distribution,
             dir,
