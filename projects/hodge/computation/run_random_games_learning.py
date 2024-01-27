@@ -67,6 +67,7 @@ def run_learning_stepsizes(
     init: str,
     distribution: str,
     dir: str,
+    dir_save: str,
 ):
     """Apply learning to random games.
     To get games with evenly distributed potentialness, we take some of the sampled games from the previous experiment for different levels of potentialness.
@@ -81,6 +82,7 @@ def run_learning_stepsizes(
         init (str): initialization of strategy
         distribution (str): distribution of random utiltities
         dir (str): directory to sampled games (from run_random_potentialness.py)
+        dir_save (str): directory to store results
     """
     print(
         f"Run Experiment for {n_agents} agents and {n_actions} actions, {n_runs} runs and {init} initialization:"
@@ -124,7 +126,7 @@ def run_learning_stepsizes(
     if len(seeds) > 0:
         # save results
         filename = f"{learner.name}_{game.name}_{distribution}_{actions}.csv"
-        save_result(data, "random_learning_1run", filename, PATH_TO_DATA)
+        save_result(data, dir_save, filename, PATH_TO_DATA)
     else:
         print(" -> Not enough settings found")
 
@@ -135,6 +137,7 @@ if __name__ == "__main__":
     n_samples_per_bin = 100
     distribution = "uniform"
     dir = "random_flow_1e6"
+    dir_save = "random_learning_1run"
     init = "equal"
 
     settings = [
@@ -164,4 +167,5 @@ if __name__ == "__main__":
             init,
             distribution,
             dir,
+            dir_save,
         )
