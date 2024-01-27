@@ -118,7 +118,7 @@ def run_learning_stepsizes(
     if len(seeds) > 0:
         # save results
         filename = f"{learner.name}_{game.name}_{distribution}_{actions}.csv"
-        save_result(data, "random_learning_equal", filename, PATH_TO_DATA)
+        save_result(data, "random_learning_20runs", filename, PATH_TO_DATA)
     else:
         print(" -> Not enough settings found")
 
