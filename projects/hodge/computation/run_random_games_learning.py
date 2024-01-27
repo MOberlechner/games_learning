@@ -46,7 +46,7 @@ def get_seeds(
     # get seeds for different levels of potentialness
     seeds = []
     for bin in tmp.bin.unique():
-        if sum((tmp.bin == bin) & (tmp.n_strict_ne > 0)) >= n_seeds_per_bin:
+        if sum((tmp.bin == bin) & (tmp.n_strict_ne > 0)) >= 1:
             seeds_bin = np.random.choice(
                 tmp.seed[tmp.bin == bin], replace=False, size=n_seeds_per_bin
             )

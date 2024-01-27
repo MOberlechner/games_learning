@@ -30,27 +30,28 @@ def run_learning(econgame: EconGame, n_bins: int, compute_equil: bool = True):
     hodge.compute_decomposition_matrix(econgame.payoff_matrix)
 
     data = deque()
-    for potent in tqdm(np.linspace(0, 1, n_bins)):
 
-        # create new game (with given potentialness) from econgame
-        payoff_matrix = hodge.create_game_potentialness(potent)
-        game = MatrixGame(n_agents, payoff_matrix)
-        game.name = label_game
+    # run learning
+    for eta, beta in tqdm(product(LIST_ETA, LIST_BETA)):
+        learner = MirrorAscent(eta=eta, beta=beta, mirror_map="entropic")
 
-        if compute_equil:
-            pure_equil = find_pure_nash_equilibrium(game)
-            equilibria = {
-                "n_weak_ne": len(pure_equil["weak_ne"]),
-                "n_strict_ne": len(pure_equil["strict_ne"]),
-                "interval": econgame.interval,
-            }
+        for potent in np.linspace(0, 1, n_bins):
 
-        # run learning
-        for run in range(N_RUNS):
-            init_strat = game.init_strategies("random")
+            # create new game (with given potentialness) from econgame
+            payoff_matrix = hodge.create_game_potentialness(potent)
+            game = MatrixGame(n_agents, payoff_matrix)
+            game.name = label_game
 
-            for eta, beta in product(LIST_ETA, LIST_BETA):
-                learner = MirrorAscent(eta=eta, beta=beta, mirror_map="entropic")
+            if compute_equil:
+                pure_equil = find_pure_nash_equilibrium(game)
+                equilibria = {
+                    "n_weak_ne": len(pure_equil["weak_ne"]),
+                    "n_strict_ne": len(pure_equil["strict_ne"]),
+                    "interval": econgame.interval,
+                }
+
+            for run in range(N_RUNS):
+                init_strat = game.init_strategies("random")
 
                 # run experiment
                 sim = Simulator(game, learner, MAX_ITER, TOL)
@@ -83,11 +84,14 @@ if __name__ == "__main__":
     n_agents = 2
     n_discr = 11
     interval = (0.00, 0.95)
+    valuations = (1.0, 1.0)
     games = [
-        FPSB(n_agents, n_discr, interval=interval),
-        SPSB(n_agents, n_discr, interval=interval),
-        AllPay(n_agents, n_discr, interval=interval),
-        Contest(n_agents, n_discr, interval=interval, csf_param=1.0),
+        FPSB(n_agents, n_discr, valuations=valuations, interval=interval),
+        SPSB(n_agents, n_discr, valuations=valuations, interval=interval),
+        AllPay(n_agents, n_discr, valuations=valuations, interval=interval),
+        Contest(
+            n_agents, n_discr, valuations=valuations, interval=interval, csf_param=1.0
+        ),
     ]
 
     # run experiments
@@ -99,8 +103,8 @@ if __name__ == "__main__":
 
     # save results
     tag, filename = (
-        "econgames_learning_stepsize",
-        f"{n_bins}bins_{n_agents}_{n_discr}_tol_{TOL}.csv",
+        "econgames",
+        f"learning_{n_agents}_{n_discr}.csv",
     )
     os.makedirs(os.path.join(PATH_TO_DATA, tag), exist_ok=True)
     df.to_csv(os.path.join(PATH_TO_DATA, tag, filename), index=False)

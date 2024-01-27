@@ -218,22 +218,22 @@ if __name__ == "__main__":
     plot_distribution_potentialness(
         list_n_agents=[2, 4, 8, 10],
         list_n_actions=[2, 4, 12, 24],
-        name="random_potentialness_1e5",
-        dir="random_flow_1e5",
+        name="random_potentialness_1e6",
+        dir="random_flow_1e6",
     )
 
     # relation potentialness and SPNE
     plot_potentialness_vs_spne(
         list_n_agents=[2, 4, 8, 10],
         list_n_actions=[2, 4, 12, 24],
-        name="random_spne_1e5",
-        dir="random_flow_1e5",
+        name="random_spne_1e6",
+        dir="random_flow_1e6",
     )
 
     # relation potentialness and SPNE
     plot_probability_spne(
         list_n_agents=[2, 4, 8, 10],
         list_n_actions=[2, 4, 12, 24],
-        name="random_prob_spne_1e5",
-        dir="random_flow_1e5",
+        name="random_prob_spne_1e6",
+        dir="random_flow_1e6",
     )

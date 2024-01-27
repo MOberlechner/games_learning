@@ -48,11 +48,11 @@ def create_legend(
     ax,
     list1,
     list2,
-    position=(5, 6),
+    position=(6, 5),
     label1="# Agents",
     label2="# Actions",
     ncols1=1,
-    ncols2=2,
+    ncols2=1,
 ):
 
     # Legend 1
