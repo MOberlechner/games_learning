@@ -196,5 +196,5 @@ if __name__ == "__main__":
         distribution,
         dir,
         dir_save,
-        num_processes=5,
+        num_processes=8,
     )
