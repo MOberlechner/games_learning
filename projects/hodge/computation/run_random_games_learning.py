@@ -1,7 +1,9 @@
+import multiprocessing
 import os
 import sys
 from collections import deque
 from datetime import datetime
+from functools import partial
 from itertools import product
 from typing import List
 
@@ -132,8 +134,41 @@ def run_learning_stepsizes(
         print(" -> Not enough settings found")
 
 
+def run_learning_mp(
+    settings: List[tuple],
+    n_bins: int,
+    n_samples_per_bin: int,
+    n_runs: int,
+    init: str,
+    distribution: str,
+    dir: str,
+    dir_save: str,
+    num_processes: int = 8,
+):
+    """multiprocessing"""
+
+    if num_processes > multiprocessing.cpu_count():
+        print(f"Only {multiprocessing.cpu_count()} cpus available")
+        num_processes = multiprocessing.cpu_count()
+
+    # create function that runs in parallel
+    func = partial(
+        run_learning_stepsizes,
+        n_bins=n_bins,
+        n_samples_per_bin=n_samples_per_bin,
+        n_runs=n_runs,
+        init=init,
+        distribution=distribution,
+        dir=dir,
+        dir_save=dir_save,
+    )
+
+    with multiprocessing.Pool(processes=num_processes) as pool:
+        results = pool.starmap(func, settings)
+
+
 if __name__ == "__main__":
-    n_runs = 100
+    n_runs = 25
     n_bins = 20
     n_samples_per_bin = 100
     distribution = "uniform"
@@ -142,25 +177,24 @@ if __name__ == "__main__":
     init = "random"
 
     settings = [
-        # (2, 2),
-        # (2, 4),
-        # (2, 12),
-        # (2, 24),
+        (2, 2),
+        (2, 4),
+        (2, 12),
+        (2, 24),
         (4, 2),
         (4, 4),
         (8, 2),
         (10, 2),
     ]
 
-    for n_agents, n_actions in settings:
-        run_learning_stepsizes(
-            n_agents,
-            n_actions,
-            n_bins,
-            n_samples_per_bin,
-            n_runs,
-            init,
-            distribution,
-            dir,
-            dir_save,
-        )
+    run_learning_mp(
+        settings,
+        n_bins,
+        n_samples_per_bin,
+        n_runs,
+        init,
+        distribution,
+        dir,
+        dir_save,
+        num_processes=5,
+    )
