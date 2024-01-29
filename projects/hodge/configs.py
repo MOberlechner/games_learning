@@ -14,7 +14,7 @@ LIST_BETA = [0.5]
 
 # Parameter Experiments
 PATH_TO_DATA = "projects/hodge/data/"
-PATH_TO_RESULTS = "projects/hodge/results/"
+PATH_TO_RESULTS = "projects/hodge/figures/"
 
 # Parameter visualization
 cmap = matplotlib.colormaps["RdBu"]
