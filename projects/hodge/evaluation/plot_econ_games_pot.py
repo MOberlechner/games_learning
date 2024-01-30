@@ -10,7 +10,7 @@ from projects.hodge.util import *
 
 def set_axis(xlim, ylim, title="", xlabel: str = "", ylabel: str = ""):
     """General settings for axis"""
-    fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 4))
+    fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 3.5))
     ax = fig.add_subplot(111)
     ax.set_xlabel(xlabel, fontsize=FONTSIZE_LABEL)
     ax.set_ylabel(ylabel, fontsize=FONTSIZE_LABEL)

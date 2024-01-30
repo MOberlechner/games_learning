@@ -21,42 +21,6 @@ from projects.hodge.configs import *
 from projects.hodge.util import save_result
 
 
-def run_matrix_potentialness():
-    """compute potentialness for different interesting matrix games"""
-    settings = {
-        "shapley_game": [
-            np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-            np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]]),
-        ],
-    }
-
-    data = deque()
-    for key, payoff_matrix in settings.items():
-        n_agents = len(payoff_matrix)
-        actions = list(payoff_matrix[0].shape)
-
-        game = MatrixGame(len(payoff_matrix), payoff_matrix, name=key)
-        pure_equil = find_pure_nash_equilibrium(game)
-
-        hodge = Game(actions, save_load=False)
-        hodge.compute_decomposition_matrix(game.payoff_matrix)
-        potentialness = hodge.metric
-
-        result = {
-            "name": key,
-            "actions": actions,
-            "potentialness": potentialness,
-            "n_weak_ne": len(pure_equil["weak_ne"]),
-            "n_strict_ne": len(pure_equil["strict_ne"]),
-            "weak_ne": pure_equil["weak_ne"],
-            "strict_new": pure_equil["strict_ne"],
-        }
-        data.append(result)
-
-    # save results
-    save_result(data, "matrix_games", f"potentialness.csv", PATH_TO_DATA)
-
-
 def get_valuations(setting: str, n_agents: int) -> Tuple[float]:
     if setting == "symmetric":
         return tuple([1.0] * n_agents)

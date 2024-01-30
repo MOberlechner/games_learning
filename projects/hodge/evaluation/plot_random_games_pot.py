@@ -20,7 +20,7 @@ def get_colors(i, n):
 
 def set_axis(xlim, ylim, title, xlabel: str = "", ylabel: str = ""):
     """General settings for axis"""
-    fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 4))
+    fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 3.5))
     ax = fig.add_subplot(111)
     ax.set_xlabel(xlabel, fontsize=FONTSIZE_LABEL)
     ax.set_ylabel(ylabel, fontsize=FONTSIZE_LABEL)
@@ -95,7 +95,7 @@ def plot_distribution_potentialness(list_n_agents, list_n_actions, name, dir):
 def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
     """plot probability of existence of strict pure Nash equilibria (spne) w.r.t. potentialness for randomly generated games"""
     # Parameter
-    n_bins = 25
+    n_bins = 20
     distribution = "uniform"
     fig, ax = set_axis((0, 1), (-0.001, 1.001), "", "Potentialness", "P(SPNE exists)")
 
@@ -149,7 +149,7 @@ def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
 def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
     """plot probability of existence of strict pure Nash equilibria (spne) for randomly generated games"""
     # Parameter
-    n_bins = 25
+    n_bins = 20
     distribution = "uniform"
     fig, ax = set_axis((0, 1), (-0.001, 1.001), "", "Potentialness", "P(SPNE exists)")
 
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     plot_distribution_potentialness(
         list_n_agents=[2, 4, 8, 10],
         list_n_actions=[2, 4, 12, 24],
-        name="random_potentialness_1e6",
+        name="random_potentialness",
         dir="random_flow_1e6",
     )
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     plot_potentialness_vs_spne(
         list_n_agents=[2, 4, 8, 10],
         list_n_actions=[2, 4, 12, 24],
-        name="random_spne_1e6",
+        name="random_spne",
         dir="random_flow_1e6",
     )
 
@@ -234,6 +234,6 @@ if __name__ == "__main__":
     plot_probability_spne(
         list_n_agents=[2, 4, 8, 10],
         list_n_actions=[2, 4, 12, 24],
-        name="random_prob_spne_1e6",
+        name="random_prob_spne",
         dir="random_flow_1e6",
     )

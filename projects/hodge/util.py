@@ -36,7 +36,10 @@ def save_result(data: list, tag, filename, PATH_TO_DATA, overwrite=True):
 
 def get_colors(i, n):
     cmap = matplotlib.colormaps["RdBu"]
-    COLORS = [cmap(0.9), cmap(0.1)]
+
+    if n == 1:
+        return cmap(1)
+
     idx = n - 1 - i
     if n % 2:
         return cmap(0.1 + idx / (n - 1) * 0.8)
