@@ -14,7 +14,7 @@ from projects.hodge.util import *
 
 def subplot_shapley(axs, i, j, matrix):
     """create subplots for plot_example_shapley"""
-    axs[i, j].imshow(matrix.T, vmin=-1, vmax=1, cmap=cmap)
+    axs[i, j].imshow(matrix.T, vmin=-1, vmax=1, cmap=CMAP)
     axs[i, j].set_xticks([])
     axs[i, j].set_yticks([])
     if i == 0:
@@ -76,7 +76,7 @@ def plot_example_shapley():
 def subplot_auction(axs, i, j, matrix, labels):
     """create subplots for plot_example_shapley"""
     axs[i, j].imshow(
-        matrix.T, vmin=-1, vmax=1, cmap=cmap, extent=(0, 0.95, 0, 0.95), origin="lower"
+        matrix.T, vmin=-1, vmax=1, cmap=CMAP, extent=(0, 0.95, 0, 0.95), origin="lower"
     )
     axs[i, j].set_yticks([])
     axs[i, j].set_xticks([])

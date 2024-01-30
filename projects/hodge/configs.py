@@ -1,3 +1,5 @@
+import matplotlib
+
 # Parameter Learning
 MAX_ITER = 2_000
 TOL = 1e-8
@@ -17,6 +19,7 @@ PATH_TO_DATA = "projects/hodge/data/"
 PATH_TO_RESULTS = "projects/hodge/figures/"
 
 # Visualization
+CMAP = matplotlib.colormaps["RdBu"]
 LS = ["solid", "dashed", "dashdot", "dotted"]
 FONTSIZE_LABEL = 13
 FONTSIZE_TITLE = 13
