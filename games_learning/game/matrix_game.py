@@ -141,6 +141,34 @@ class MatrixGame:
             )
 
 
+class JordanGame(MatrixGame):
+    def __init__(
+        self,
+        seed: int = None,
+        distribution: str = "uniform",
+    ):
+        """Jordan Game: Def 2.1 in Jordan, “Three Problems in Learning Mixed-Strategy Nash Equilibria."""
+        payoff_matrix = self.create_matrices(seed)
+        super().__init__(2, payoff_matrix)
+        self.name = f"jordan_game({seed})" if seed is not None else "jordan_game"
+
+    def __repr__(self) -> str:
+        return (
+            f"JordanGame(alpha={self.alpha:.3f},beta={self.beta:.3f}, seed={self.seed})"
+        )
+
+    def create_matrices(self, seed: int):
+        np.random.seed(seed)
+        self.seed = seed
+        self.alpha, self.beta = np.random.uniform(size=2)
+        return tuple(
+            [
+                np.array([[1 - self.alpha, -self.alpha], [0, 0]]),
+                np.array([[self.beta - 1, 0], [self.beta, 0]]),
+            ]
+        )
+
+
 class RandomMatrixGame(MatrixGame):
     def __init__(
         self,
@@ -149,7 +177,7 @@ class RandomMatrixGame(MatrixGame):
         seed: int = None,
         distribution: str = "uniform",
     ):
-        """Create random matrix game
+        """Create random matrix game ”
 
         Args:
             n_agents (_type_): _description_
