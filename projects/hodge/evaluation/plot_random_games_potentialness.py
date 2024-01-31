@@ -62,7 +62,9 @@ def plot_distribution_potentialness(list_n_agents, list_n_actions, name, dir):
                     zorder=i,
                 )
             except:
-                print(f"Setting {[n_actions]*n_agents} not available (path:{path})")
+                # if file should exist, print error message
+                if (n_agents, n_discr) in SETTINGS:
+                    print(e)
 
     # special games
     show_special_games = False
@@ -135,7 +137,9 @@ def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
                         f"number of SPNE not avaliable for setting {[n_actions]*n_agents}"
                     )
             except:
-                print(f"Setting {[n_actions]*n_agents} not available (path:{path})")
+                # if file should exist, print error message
+                if (n_agents, n_discr) in SETTINGS:
+                    print(e)
 
     # add legends
     legend1, legend2 = create_legend(ax, list_n_agents, list_n_actions)
@@ -197,7 +201,9 @@ def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
                         f"number of SPNE not avaliable for setting {[n_actions]*n_agents}"
                     )
             except:
-                print(f"Setting {[n_actions]*n_agents} not available (path:{path})")
+                # if file should exist, print error message
+                if (n_agents, n_discr) in SETTINGS:
+                    print(e)
 
     plt.axhline(y=1 - 1 / np.exp(1), color="k", linestyle="--", linewidth=0.7)
     plt.text(y=1 - 1 / np.exp(1) - 0.05, x=0.8, s=r"$1-\dfrac{1}{e}$", fontsize=8)

@@ -276,12 +276,12 @@ if __name__ == "__main__":
         dir="random_learning_25run",
     )
 
-    # for eta, beta in product(LIST_ETA, LIST_BETA):
-    #    plot_learning_fixed_init(
-    #        list_n_agents=[2, 4, 8, 10],
-    #        list_n_actions=[2, 4, 12, 24],
-    #        eta = eta,
-    #        beta = beta,
-    #        name=f"random_learning_fixed_init_{eta}_{beta}",
-    #        dir="random_learning_1run",
-    #    )
+    for eta, beta in product(LIST_ETA, LIST_BETA):
+        plot_learning_fixed_init(
+            list_n_agents=[2, 4, 8, 10],
+            list_n_actions=[2, 4, 12, 24],
+            eta=eta,
+            beta=beta,
+            name=f"random_learning_fixed_init_{eta}_{beta}",
+            dir="random_learning_1run",
+        )
