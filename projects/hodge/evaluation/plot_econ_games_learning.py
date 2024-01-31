@@ -113,6 +113,7 @@ def plot(
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 if __name__ == "__main__":

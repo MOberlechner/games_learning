@@ -114,6 +114,7 @@ def plot_learning_diff_init(list_n_agents, list_n_actions, eta, beta, name, dir)
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 def plot_learning_diff_init_2agents(
@@ -168,6 +169,7 @@ def plot_learning_diff_init_2agents(
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 # ------------------------------------------------------------------------------------------------- #
@@ -254,6 +256,7 @@ def plot_learning_fixed_init(list_n_agents, list_n_actions, eta, beta, name, dir
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 if __name__ == "__main__":

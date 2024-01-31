@@ -16,12 +16,15 @@ from games_learning.utils.equil import find_pure_nash_equilibrium
 from projects.hodge.configs import *
 
 
-def run_learning(econgame: EconGame, n_bins: int, compute_equil: bool = True):
+def run_learning(
+    econgame: EconGame, n_bins: int, n_runs: int, compute_equil: bool = True
+):
     """Run learning algorithms for different convex combinations (i.e., levels of potentialness) of harmonic and potential part of an underlying economic game.
 
     Args:
         econgame (EconGame): underlying econ_game (e.g. FPSB, SPSB, ...)
         n_bins (int): number of levels of potentialness
+        n_runs (int): number of runs (random initial points)
         compute_equil (bool): compute pure equilibria and add to results
     """
     label_game = econgame.name
@@ -50,7 +53,7 @@ def run_learning(econgame: EconGame, n_bins: int, compute_equil: bool = True):
                     "interval": econgame.interval,
                 }
 
-            for run in range(N_RUNS):
+            for run in range(n_runs):
                 init_strat = game.init_strategies("random")
 
                 # run experiment
@@ -78,7 +81,8 @@ def run_learning(econgame: EconGame, n_bins: int, compute_equil: bool = True):
 
 if __name__ == "__main__":
 
-    n_bins = 25
+    n_bins = 20
+    n_runs = 100
 
     # economic games
     n_agents = 2
@@ -98,13 +102,13 @@ if __name__ == "__main__":
     df = pd.DataFrame()
     for econgame in games:
         print(f"Run Experiment for {econgame}")
-        result = run_learning(econgame, n_bins)
+        result = run_learning(econgame, n_bins, n_runs)
         df = pd.concat([df, pd.DataFrame(result)])
 
     # save results
     tag, filename = (
         "econgames",
-        f"learning_{n_agents}_{n_discr}.csv",
+        f"learning_{n_agents}_{n_discr}_{n_bins}bins_{n_runs}runs.csv",
     )
     os.makedirs(os.path.join(PATH_TO_DATA, tag), exist_ok=True)
     df.to_csv(os.path.join(PATH_TO_DATA, tag, filename), index=False)

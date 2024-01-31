@@ -173,19 +173,10 @@ if __name__ == "__main__":
     n_samples_per_bin = 100
     distribution = "uniform"
     dir = "random_flow_1e6"
-    dir_save = f"random_learning_{n_runs}run_2"
+    dir_save = f"random_learning_{n_runs}run"
     init = "random"
 
-    settings = [
-        (2, 2),
-        (2, 4),
-        (2, 12),
-        (2, 24),
-        (4, 2),
-        (4, 4),
-        (8, 2),
-        (10, 2),
-    ]
+    settings = SETTINGS
 
     run_learning_mp(
         settings,

@@ -63,7 +63,7 @@ def plot_distribution_potentialness(list_n_agents, list_n_actions, name, dir):
                 )
             except:
                 # if file should exist, print error message
-                if (n_agents, n_discr) in SETTINGS:
+                if (n_agents, n_actions) in SETTINGS:
                     print(e)
 
     # special games
@@ -92,6 +92,7 @@ def plot_distribution_potentialness(list_n_agents, list_n_actions, name, dir):
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
@@ -138,7 +139,7 @@ def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
                     )
             except:
                 # if file should exist, print error message
-                if (n_agents, n_discr) in SETTINGS:
+                if (n_agents, n_actions) in SETTINGS:
                     print(e)
 
     # add legends
@@ -148,6 +149,7 @@ def plot_potentialness_vs_spne(list_n_agents, list_n_actions, name, dir):
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
@@ -202,7 +204,7 @@ def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
                     )
             except:
                 # if file should exist, print error message
-                if (n_agents, n_discr) in SETTINGS:
+                if (n_agents, n_actions) in SETTINGS:
                     print(e)
 
     plt.axhline(y=1 - 1 / np.exp(1), color="k", linestyle="--", linewidth=0.7)
@@ -215,6 +217,7 @@ def plot_probability_spne(list_n_agents, list_n_actions, name, dir):
 
     path_save = os.path.join(PATH_TO_RESULTS, name)
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 if __name__ == "__main__":

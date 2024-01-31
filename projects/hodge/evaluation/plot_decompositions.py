@@ -51,7 +51,6 @@ def plot_example_shapley():
 
     hodge = Game(n_actions=[3, 3], save_load=False)
     hodge.compute_decomposition_matrix(payoff_matrix)
-    print(f"Potentialness Shapley Game: {hodge.metric}")
 
     fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 4))
     gs = fig.add_gridspec(2, 4, hspace=-0.53, wspace=0.1)
@@ -68,6 +67,7 @@ def plot_example_shapley():
 
     path_save = os.path.join(PATH_TO_RESULTS, "decomposition_shapley")
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 # --------------------------------------------- AUCTION --------------------------------------------- #
@@ -118,6 +118,7 @@ def plot_auctions(n_discr):
 
     path_save = os.path.join(PATH_TO_RESULTS, "decomposition_auctions")
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 def plot_allpay(n_discr):
@@ -150,6 +151,7 @@ def plot_allpay(n_discr):
 
     path_save = os.path.join(PATH_TO_RESULTS, "decomposition_allpay")
     fig.savefig(f"{path_save}.{FORMAT}", bbox_inches="tight")
+    print(f"figure: '{path_save}.{FORMAT}' created")
 
 
 if __name__ == "__main__":

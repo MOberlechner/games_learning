@@ -62,6 +62,7 @@ def run_matrix_potentialness():
         }
         data.append(result)
 
+    # Jordan Game (alpha, beta)
     n_seeds = 1_000_000
     hodge = Game([2, 2], save_load=False)
     for seed in tqdm(range(n_seeds)):

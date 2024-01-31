@@ -126,22 +126,7 @@ def run_random_potentialness_mp(
 if __name__ == "__main__":
 
     # compute potentialness for random games
-    settings = [
-        (2, 2),
-        (2, 3),
-        (2, 4),
-        (2, 5),
-        (2, 12),
-        (2, 24),
-        (3, 2),
-        (3, 3),
-        (3, 4),
-        (3, 5),
-        (4, 2),
-        (4, 4),
-        (8, 2),
-        (10, 2),
-    ]
+    settings = SETTINGS
     for n_agents, n_actions in settings:
         actions = [n_actions] * n_agents
         print(f"Experiment: {actions}")
