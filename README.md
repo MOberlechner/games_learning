@@ -20,9 +20,9 @@ The implementation focuses on
 
 
 ## Setup
-
+<details><summary>
 Note: These setup instructions assume a Linux-based OS and uses python 3.11 (or higher).
-
+</summary>
 Install virtualenv (or whatever you prefer for virtual envs)
 ```
 sudo apt-get install virtualenv
@@ -67,3 +67,4 @@ pre-commit run --all-files
 ```
 
 For more information see https://pre-commit.com/.
+</details>
