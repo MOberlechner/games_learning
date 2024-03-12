@@ -1,4 +1,4 @@
-# Learning in Matrix Games
+# Learning in Normal-Form Games
 This repo focuses on matrix games and learning algorithms.
 
 ### What is implemented?
