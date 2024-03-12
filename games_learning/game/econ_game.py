@@ -2,62 +2,74 @@ from itertools import product
 from typing import List, Tuple
 
 import numpy as np
+from matrix_game import MatrixGame
 
-from games_learning.game.matrix_game import MatrixGame
 
+class Game:
+    """Class for Normal-Form Game G = (N, X, u)
 
-class EconGame(MatrixGame):
-    """This class allows us to construct matrix games from continuous, complete information economic games such as auctions and contests"""
+    with    - N is set of agents
+            - X is action space (1-dim)
+            - u is utility function
+    """
 
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
-        interval: Tuple[float] = (0.0, 1.0),
+        action_space: List[Tuple] = None,
+        name: str = "game",
     ):
-        self.agents = list(range(n_agents))
-        payoff_matrix = self.create_payoff_matrix(n_agents, n_discr, interval)
-        super().__init__(n_agents=n_agents, payoff_matrix=payoff_matrix)
-        self.name = "econgame"
-        self.interval = interval
+        self.name = name
+        self.n_agents = n_agents
+        self.agents = list(range(agents))
 
-    def __repr__(self) -> str:
-        return f"EconGame({self.name},{self.n_actions})"
+        self.action_space = (
+            action_space if len(action_space) > 1 else [action_space] * n_agents
+        )
+        assert len(action_space) == self.n_agents
 
-    def create_payoff_matrix(
+    def utility(self, actions: Tuple[float]) -> Tuple[float]:
+        """utilities for all agents given an action profile"""
+        raise NotImplementedError
+
+
+class EconGame(Game):
+    """Class for Economic Games such as Auctions, Contests, and Pricing Games"""
+
+    def __init__(
         self,
         n_agents: int,
-        n_discr: int,
-        interval: Tuple[float] = (0.0, 1.0),
-    ) -> Tuple[np.ndarray]:
-        """Create payoff matrix of game given a discretization of the action space. We assume that agents are symmetric, i.e., have same action space.
+        action_space: Tuple[float] = (0.0, 1.0),
+    ):
+        """Create EconGame Class
 
         Args:
             n_agents (int): number of agents
-            n_discr (int): discretization parameter action space
-            interval (Tuple[float], optional): interval of action space. Defaults to (0.0,1.0).
+            action_space (Tuple[float], optional): action space of single agent (we assume symmetry). Defaults to (0.0, 1.0).
+        """
+        super().__init__(n_agents, action_space, "econgame")
+
+    def discretize(self, n_discr: int) -> MatrixGame:
+        """Create matrix game by discretizing the action space
+
+        Args:
+            n_discr (int): number of discrete actions per agent (equidistant)
 
         Returns:
-            Tuple[np.ndarray]: payoff matrix for each agent
+            MatrixGame: constructed matrix game
         """
-        # create action vector
-        actions = np.linspace(*interval, n_discr)
-        self.actions = actions
-        # compute utilities
-        util_arr = np.array(
-            [
-                self.ex_post_utility(np.array(a))
-                for a in product(actions, repeat=n_agents)
-            ]
-        )
-        # reformat array
+        # create payoff matrices
+        actions = [np.linspace(*interval, n_discr) for interval in self.action_space]
+        util_arr = np.array([self.utility(np.array(a)) for a in product(*actions)])
         util_arr_form = util_arr.T.reshape([n_agents] + [n_discr] * n_agents)
-        # return as tuple
-        return tuple([util for util in util_arr_form])
+        payoff_matrices = tuple([util for util in util_arr_form])
 
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """compute ex-post utility given a action profile"""
-        raise NotImplementedError
+        # create matrix game
+        matrix_game = MatrixGame(
+            self.n_agents, payoff_matrices, f"{self.name}_discr{n_discr}"
+        )
+
+        return matrix_game
 
 
 class FPSB(EconGame):
@@ -66,18 +78,15 @@ class FPSB(EconGame):
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
-        valuations: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
+        action_space: Tuple[float],
+        valuation: Tuple[float],
     ):
-        self.valuation = np.array(valuations)
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "fpsb"
+        super().__init__(n_agents, action_space, "fpsb")
+        self.valuation = valuation
+        assert len(valuation) == n_agents
 
-        assert len(valuations) == n_agents
-
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for FPSB"""
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """utility for FPSB"""
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
@@ -93,18 +102,16 @@ class SPSB(EconGame):
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
-        valuations: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
+        action_space: Tuple[float],
+        valuation: Tuple[float],
     ):
-        self.valuation = np.array(valuations)
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "spsb"
+        super().__init__(n_agents, action_space, "spsb")
+        self.valuation = valuation
 
-        assert len(valuations) == n_agents
+        assert len(valuation) == n_agents
 
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for SPSB"""
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """utility for SPSB"""
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
@@ -120,20 +127,17 @@ class AlphaSB(EconGame):
     def __init__(
         self,
         n_agents: int,
+        action_space: Tuple[float],
         alpha: float,
-        n_discr: int,
-        valuations: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
+        valuation: Tuple[float],
     ):
-        self.valuation = np.array(valuations)
-        self.alpha = alpha
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "alpha_sb"
+        super().__init__(n_agents, action_space, "alpha_sb")
+        self.valuation = valuation
 
-        assert len(valuations) == n_agents
+        assert len(valuation) == n_agents
 
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for AlphaSB"""
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """utility for AlphaSB"""
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
@@ -151,20 +155,18 @@ class AllPay(EconGame):
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
+        action_space: Tuple[float],
         valuations: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
     ):
-        self.valuation = np.array(valuations)
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "allpay"
+        super().__init__(n_agents, action_space, "allpay")
+        self.valuation = valuation
 
-        assert len(valuations) == n_agents
+        assert len(valuation) == n_agents
 
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for All-Pay Auction"""
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """utility for All-Pay Auction"""
         # compute allocation
-        action_max = np.array(action_profile) == np.array(action_profile).max()
+        action_max = action_profile == action_profile.max()
         allocation = action_max / action_max.sum()
         # compute ex-post utility
         return allocation * self.valuation - action_profile
@@ -176,17 +178,21 @@ class Contest(EconGame):
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
+        action_space: Tuple[float],
         valuations: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
         csf_param: float = 1.0,
     ):
+        super().__init__(n_agents, action_space, "contest")
         self.csf_param = csf_param
         self.valuation = np.array(valuations)
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "contest"
 
-        assert len(valuations) == n_agents
+        assert len(valuation) == n_agents
+
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for Tullock-Contest"""
+        allocation = self.allocation(action_profile)
+        payments = action_profile
+        return allocation * self.valuation - payments
 
     def allocation(self, action_profile: np.ndarray) -> np.ndarray:
         """compute winning probabilities for Tullock-Contest"""
@@ -199,12 +205,6 @@ class Contest(EconGame):
         else:
             return np.ones(n_agents) / n_agents
 
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for Tullock-Contest"""
-        allocation = self.allocation(action_profile)
-        payments = action_profile
-        return allocation * self.valuation - payments
-
 
 class Cournot(EconGame):
     """Cournot Competition"""
@@ -212,28 +212,28 @@ class Cournot(EconGame):
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
-        a: float,
-        b: Tuple[float],
+        action_space: Tuple[float],
+        alpha: float,
+        beta: Tuple[float],
         cost: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
     ):
-        self.a = a
-        self.b = b
+        super().__init__(n_agents, action_space, "cournot")
+        self.alpa = alpha
+        self.beta = beta
         self.cost = cost
-        assert len(b) == n_agents
+
+        assert len(beta) == n_agents
         assert len(cost) == n_agents
 
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "cournot"
-
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for Cournot Competition"""
         return action_profile * (self.price(action_profile) - np.array(self.cost))
 
     def price(self, action_profile: np.ndarray) -> float:
         """Compute price given quantities (actions) of firms (agents)"""
-        return np.maximum(self.a - (np.array(self.b) * action_profile).sum(), 0.0)
+        return np.maximum(
+            self.alpha - (np.array(self.beta) * action_profile).sum(), 0.0
+        )
 
 
 class BertrandLinear(EconGame):
@@ -242,23 +242,23 @@ class BertrandLinear(EconGame):
     def __init__(
         self,
         n_agents: int,
-        n_discr: int,
+        action_space: Tuple[float],
         alpha: Tuple[float],
         beta: Tuple[float],
         gamma: float,
         cost: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
     ):
 
+        super().__init__(n_agents, action_space, "bertrand_linear")
         self.alpha = np.array(alpha)
         self.beta = np.array(beta)
         self.gamma = gamma
         self.cost = np.array(cost)
 
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "bertrand_linear"
+        assert len(b) == n_agents
+        assert len(cost) == n_agents
 
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+    def utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for Bertrand Competition with linear demand"""
         return self.demand(action_profile) * (action_profile - self.cost)
 
@@ -269,10 +269,13 @@ class BertrandLinear(EconGame):
             - self.beta * action_profile
             + self.gamma
             * np.array(
-                [self.sum_prices_opponents(action_profile, i) for i in self.agents]
+                [self.mean_prices_opponents(action_profile, i) for i in self.agents]
             )
         )
 
-    def sum_prices_opponents(self, action_profile: np.ndarray, agent: int) -> float:
+    def mean_prices_opponents(self, action_profile: np.ndarray, agent: int) -> float:
         """Compute sum of prices of all agents except for agent (index)"""
-        return action_profile[:agent].sum() + action_profile[agent + 1 :].sum()
+        return (
+            1 / (len(action_profile) - 1) * action_profile[:agent].sum()
+            + action_profile[agent + 1 :].sum()
+        )
