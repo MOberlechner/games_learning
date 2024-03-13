@@ -7,11 +7,13 @@ import numpy as np
 from games_learning.game.matrix_game import MatrixGame
 
 
-def find_pure_nash_equilibrium(game: MatrixGame) -> Dict[str, List[tuple]]:
+def find_pure_nash_equilibrium(
+    game: MatrixGame, eps: float = 1e-10
+) -> Dict[str, List[tuple]]:
     action_profiles = generate_action_profiles(game.n_actions)
     weak_ne, strict_ne = [], []
     for a in action_profiles:
-        result = check_pure_nash_equilibrium(a, game.payoff_matrix, game.n_actions)
+        result = check_pure_nash_equilibrium(a, game.payoff_matrix, game.n_actions, eps)
         if result == 0:
             weak_ne.append(a)
         elif result == 1:
@@ -32,9 +34,12 @@ def generate_deviations(action_profile: Tuple[int], agent: int, n_actions_agent:
 
 
 def check_pure_nash_equilibrium(
-    action_profile: Tuple[int], payoff_matrix: Tuple[np.ndarray], n_actions: List[int]
+    action_profile: Tuple[int],
+    payoff_matrix: Tuple[np.ndarray],
+    n_actions: List[int],
+    eps: float = 1e-10,
 ) -> int:
-    """return -1 if not pure equilibria, 0 if weak, and 1 if strict equilibrium"""
+    """return -1 if not pure equilibria, 0 if weak, and 1 if strict eps-equilibrium"""
     n_agents = len(n_actions)
     is_pure = 1
     for i in range(n_agents):
@@ -44,10 +49,10 @@ def check_pure_nash_equilibrium(
                 for d in generate_deviations(action_profile, i, n_actions[i])
             )
         )
-        if np.any(payoff_matrix[i][action_profile] < payoff_deviations):
+        if np.any(payoff_matrix[i][action_profile] + eps < payoff_deviations):
             # one deviation yields higher payoff -> no equilibrium
             return -1
-        elif np.all(payoff_matrix[i][action_profile] > payoff_deviations):
+        elif np.all(payoff_matrix[i][action_profile] > payoff_deviations + eps):
             # for this agent, action is strictly better
             is_pure *= 1
         else:

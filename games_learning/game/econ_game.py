@@ -2,7 +2,8 @@ from itertools import product
 from typing import List, Tuple
 
 import numpy as np
-from matrix_game import MatrixGame
+
+from games_learning.game.matrix_game import MatrixGame
 
 
 class Game:
@@ -21,12 +22,17 @@ class Game:
     ):
         self.name = name
         self.n_agents = n_agents
-        self.agents = list(range(agents))
+        self.agents = list(range(n_agents))
 
         self.action_space = (
-            action_space if len(action_space) > 1 else [action_space] * n_agents
+            action_space
+            if isinstance(action_space, list)
+            else [action_space] * n_agents
         )
         assert len(action_space) == self.n_agents
+
+    def __repr__(self) -> str:
+        return self.name
 
     def utility(self, actions: Tuple[float]) -> Tuple[float]:
         """utilities for all agents given an action profile"""
@@ -40,14 +46,16 @@ class EconGame(Game):
         self,
         n_agents: int,
         action_space: Tuple[float] = (0.0, 1.0),
+        name: str = "econgame",
     ):
         """Create EconGame Class
 
         Args:
             n_agents (int): number of agents
             action_space (Tuple[float], optional): action space of single agent (we assume symmetry). Defaults to (0.0, 1.0).
+            name (str): name of game. Defaults to "econgame"
         """
-        super().__init__(n_agents, action_space, "econgame")
+        super().__init__(n_agents, action_space, name)
 
     def discretize(self, n_discr: int) -> MatrixGame:
         """Create matrix game by discretizing the action space
@@ -61,7 +69,7 @@ class EconGame(Game):
         # create payoff matrices
         actions = [np.linspace(*interval, n_discr) for interval in self.action_space]
         util_arr = np.array([self.utility(np.array(a)) for a in product(*actions)])
-        util_arr_form = util_arr.T.reshape([n_agents] + [n_discr] * n_agents)
+        util_arr_form = util_arr.T.reshape([self.n_agents] + [n_discr] * self.n_agents)
         payoff_matrices = tuple([util for util in util_arr_form])
 
         # create matrix game
@@ -156,7 +164,7 @@ class AllPay(EconGame):
         self,
         n_agents: int,
         action_space: Tuple[float],
-        valuations: Tuple[float],
+        valuation: Tuple[float],
     ):
         super().__init__(n_agents, action_space, "allpay")
         self.valuation = valuation
@@ -179,12 +187,12 @@ class Contest(EconGame):
         self,
         n_agents: int,
         action_space: Tuple[float],
-        valuations: Tuple[float],
+        valuation: Tuple[float],
         csf_param: float = 1.0,
     ):
         super().__init__(n_agents, action_space, "contest")
         self.csf_param = csf_param
-        self.valuation = np.array(valuations)
+        self.valuation = np.array(valuation)
 
         assert len(valuation) == n_agents
 

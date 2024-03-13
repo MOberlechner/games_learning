@@ -50,7 +50,6 @@ def run_learning(
                 equilibria = {
                     "n_weak_ne": len(pure_equil["weak_ne"]),
                     "n_strict_ne": len(pure_equil["strict_ne"]),
-                    "interval": econgame.interval,
                 }
 
             for run in range(n_runs):
@@ -87,20 +86,21 @@ if __name__ == "__main__":
     # economic games
     n_agents = 2
     n_discr = 11
-    interval = (0.00, 0.95)
-    valuations = (1.0, 1.0)
+    action_space = (0.00, 0.95)
+    valuation = (1.0, 1.0)
+
     games = [
-        FPSB(n_agents, n_discr, valuations=valuations, interval=interval),
-        SPSB(n_agents, n_discr, valuations=valuations, interval=interval),
-        AllPay(n_agents, n_discr, valuations=valuations, interval=interval),
-        Contest(
-            n_agents, n_discr, valuations=valuations, interval=interval, csf_param=1.0
-        ),
+        FPSB(n_agents, action_space, valuation),
+        SPSB(n_agents, action_space, valuation),
+        AllPay(n_agents, action_space, valuation),
+        Contest(n_agents, action_space, valuation, csf_param=1.0),
     ]
 
     # run experiments
     df = pd.DataFrame()
-    for econgame in games:
+    for game in games:
+        econgame = game.discretize(n_discr)
+
         print(f"Run Experiment for {econgame}")
         result = run_learning(econgame, n_bins, n_runs)
         df = pd.concat([df, pd.DataFrame(result)])

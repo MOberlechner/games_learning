@@ -32,7 +32,7 @@ def get_valuations(setting: str, n_agents: int) -> Tuple[float]:
 
 def run_econgames_potentialness(
     list_actions: List[int],
-    interval: tuple = (0.00, 0.95),
+    action_space: tuple = (0.00, 0.95),
     compute_equil: bool = False,
 ):
     """compute potentialness for econgames"""
@@ -48,35 +48,30 @@ def run_econgames_potentialness(
         for val_setting in ["symmetric", "asymmetric"]:
 
             # create game
-            valuations = get_valuations(val_setting, n_agents)
+            valuation = get_valuations(val_setting, n_agents)
             games = [
-                FPSB(n_agents, n_actions, valuations=valuations, interval=interval),
-                SPSB(n_agents, n_actions, valuations=valuations, interval=interval),
-                AllPay(n_agents, n_actions, valuations=valuations, interval=interval),
-                Contest(
-                    n_agents,
-                    n_actions,
-                    valuations=valuations,
-                    interval=interval,
-                    csf_param=1.0,
-                ),
+                FPSB(n_agents, action_space, valuation),
+                SPSB(n_agents, action_space, valuation),
+                AllPay(n_agents, action_space, valuation),
+                Contest(n_agents, action_space, valuation, csf_param=1.0),
             ]
 
             for game in games:
                 # compute decomposition
-                hodge.compute_flow_decomposition_matrix(game.payoff_matrix)
+                matrix_game = game.discretize(n_actions)
+                hodge.compute_flow_decomposition_matrix(matrix_game.payoff_matrix)
                 potentialness = hodge.flow_metric
                 result = {
-                    "game": game.name,
+                    "game": matrix_game.name,
                     "n_agents": n_agents,
                     "n_discr": n_actions,
                     "valuation": val_setting,
-                    "interval": interval,
+                    "interval": action_space,
                     "potentialness": potentialness,
                 }
                 # compute pure equilibria
                 if compute_equil:
-                    pure_equil = find_pure_nash_equilibrium(game)
+                    pure_equil = find_pure_nash_equilibrium(matrix_game)
                     equilibria = {
                         "n_weak_ne": len(pure_equil["weak_ne"]),
                         "n_strict_ne": len(pure_equil["strict_ne"]),
@@ -97,4 +92,6 @@ if __name__ == "__main__":
     # compute potentialness for econcames
     list_n_discr = range(5, 26)
     list_actions = [[n_discr, n_discr] for n_discr in list_n_discr]
-    run_econgames_potentialness(list_actions, interval=(0.0, 0.95), compute_equil=True)
+    run_econgames_potentialness(
+        list_actions, action_space=(0.0, 0.95), compute_equil=True
+    )
