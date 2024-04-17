@@ -1,4 +1,5 @@
 import matplotlib
+import matplotlib.pyplot as plt
 
 # Parameter Learning
 MAX_ITER = 2_000
@@ -13,13 +14,14 @@ SETTINGS = [(2, 2), (2, 4), (2, 12), (2, 24), (4, 2), (4, 4), (8, 2), (10, 2)]
 
 # Data
 PATH_TO_DATA = "projects/hodge/data/"
-PATH_TO_RESULTS = "projects/hodge/figures/"
+PATH_TO_RESULTS = "projects/hodge/figures_ecai/"
 
 # Visualization
+plt.rcParams["font.family"] = "Times New Roman"
 CMAP = matplotlib.colormaps["RdBu"]
 LS = ["solid", "dashed", "dashdot", "dotted"]
-FONTSIZE_LABEL = 13
-FONTSIZE_TITLE = 13
-FONTSIZE_LEGEND = 13
+FONTSIZE_LABEL = 12
+FONTSIZE_TITLE = 12
+FONTSIZE_LEGEND = 12
 FORMAT = "pdf"
 DPI = 300
