@@ -21,7 +21,7 @@ python projects/hodge/computation/run_matrix_games_potentialness.py
 **Evaluation**
 - generate Figure 1
 ```python
-python projects/hodge/decompositions.py 
+projects/hodge/evaluation/plot_decompositions.py 
 ```
 
 ## Random Games
