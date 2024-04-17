@@ -19,11 +19,12 @@ def subplot_shapley(axs, i, j, matrix):
     axs[i, j].set_yticks([])
     if i == 0:
         axs[i, j].set_title(
-            ["Payoff", "Potential", "Harmonic", "Non-Strategic"][j], fontsize=9
+            ["Payoff", "Potential", "Harmonic", "Non-Strategic"][j],
+            fontsize=FONTSIZE_TITLE,
         )
-        axs[i, 0].set_ylabel("Agent 1", fontsize=9)
+        axs[i, 0].set_ylabel("Agent 1", fontsize=FONTSIZE_LABEL)
     else:
-        axs[i, 0].set_ylabel("Agent 2", fontsize=9)
+        axs[i, 0].set_ylabel("Agent 2", fontsize=FONTSIZE_LABEL)
 
     n, m = matrix.shape
     for k in range(n):
@@ -35,7 +36,7 @@ def subplot_shapley(axs, i, j, matrix):
                 f"{val:.2f}",
                 horizontalalignment="center",
                 verticalalignment="center",
-                fontsize=6,
+                fontsize=8,
                 color="k" if val < 0.9 else "white",
             )
 
