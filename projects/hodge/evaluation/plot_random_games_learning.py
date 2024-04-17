@@ -64,7 +64,9 @@ def prepare_data_diff_init(df, eta, beta, filter_small_samples: bool = False):
     return df
 
 
-def plot_learning_diff_init(list_n_agents, list_n_actions, eta, beta, name, dir):
+def plot_learning_diff_init(
+    list_n_agents, list_n_actions, eta, beta, name, dir, include_std=False
+):
     # Parameter
     distribution = "uniform"
     learner = "mirror_ascent(entropic)"
@@ -84,7 +86,6 @@ def plot_learning_diff_init(list_n_agents, list_n_actions, eta, beta, name, dir)
                 # import data
                 df = pd.read_csv(path)
                 df = prepare_data_diff_init(df, eta, beta, filter_small_samples=True)
-
                 # visualize
                 ax.plot(
                     df["potentialness"],
@@ -94,14 +95,15 @@ def plot_learning_diff_init(list_n_agents, list_n_actions, eta, beta, name, dir)
                     linestyle=LS[j],
                     zorder=i,
                 )
-                # ax.fill_between(
-                #    df["potentialness"],
-                #    df[("convergence", "mean")] - df[("convergence", "std")],
-                #    df[("convergence", "mean")] + df[("convergence", "std")],
-                #    color=get_colors(i, len(list_n_agents)),
-                #    zorder=i,
-                #    alpha = 0.1
-                # )
+                if include_std:
+                    ax.fill_between(
+                        df["potentialness"],
+                        df[("convergence", "mean")] - df[("convergence", "std")],
+                        df[("convergence", "mean")] + df[("convergence", "std")],
+                        color=get_colors(i, len(list_n_agents)),
+                        zorder=i,
+                        alpha=0.1,
+                    )
             except Exception as e:
                 # if file should exist, print error message
                 if (n_agents, n_discr) in SETTINGS:
