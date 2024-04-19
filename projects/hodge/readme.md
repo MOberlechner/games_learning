@@ -24,6 +24,18 @@ python projects/hodge/computation/run_matrix_games_potentialness.py
 projects/hodge/evaluation/plot_decompositions.py 
 ```
 
+## Runtime
+**Computation**
+- generate data with runtime for computation of potentialness and necessary operators (_data/runtime/flow_space.csv_)
+```python
+python projects/hodge/computation/run_runtime.py 
+```
+**Evaluation**
+- generate Figure 2
+```python
+projects/hodge/evaluation/plot_runtime.py 
+```
+
 ## Random Games
 **Computation**
 - generate data with potentialness and pure equilibria of 10^6 random games (_data/random_flow_1e6/*_)
@@ -33,8 +45,8 @@ python projects/hodge/computation/run_random_games_potentialness.py
 python projects/hodge/computation/run_random_games_learning.py 
 ```
 **Evaluation**
-- generate Figure 2, 3 and 
-- generate Figure 5 and 8
+- generate Figure 3, 4 and 
+- generate Figure 6 and 9
 ```python
 python projects/hodge/evaluation/plot_random_games_potentialness.py 
 python projects/hodge/evaluation/plot_random_games_learning.py 
@@ -48,8 +60,8 @@ python projects/hodge/computation/run_econ_games_potentialness.py
 python projects/hodge/computation/run_econ_games_learning.py 
 ```
 **Evaluation**
-- create Figure 6
 - create Figure 7
+- create Figure 8
 ```python
 python projects/hodge/evaluation/plot_econ_games_potentialness.py 
 python projects/hodge/evaluation/plot_econ_games_learning.py 
