@@ -47,6 +47,19 @@ def get_colors(i, n):
         return cmap(idx / (n - 1))
 
 
+def set_axis(xlim, ylim, title="", xlabel: str = "", ylabel: str = ""):
+    """General settings for axis"""
+    fig = plt.figure(tight_layout=True, dpi=DPI, figsize=(5, 3.5))
+    ax = fig.add_subplot(111)
+    ax.set_xlabel(xlabel, fontsize=FONTSIZE_LABEL)
+    ax.set_ylabel(ylabel, fontsize=FONTSIZE_LABEL)
+    ax.set_ylim(ylim)
+    ax.set_xlim(xlim)
+    ax.grid(linestyle="-", linewidth=0.25, color="lightgrey", zorder=-10, alpha=0.2)
+    ax.set_title(title, fontsize=FONTSIZE_TITLE)
+    return fig, ax
+
+
 def create_legend(
     ax,
     list1,
