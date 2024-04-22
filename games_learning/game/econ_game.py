@@ -135,7 +135,9 @@ class AlphaSB(EconGame):
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for AlphaSB"""
         # compute allocation
-        action_max = np.array(action_profile) == np.array(action_profile).max()
+        action_max = np.isclose(
+            np.array(action_profile), np.array(action_profile).max()
+        )
         allocation = action_max / action_max.sum()
         # compute payment
         first_price = first_price = action_profile.max()
@@ -236,7 +238,54 @@ class Cournot(EconGame):
         return np.maximum(self.a - (np.array(self.b) * action_profile).sum(), 0.0)
 
 
-class BertrandLinear(EconGame):
+class Bertrand(EconGame):
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        cost: Tuple[float],
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        self.cost = np.array(cost)
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "bertrand"
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for Bertrand Competition with linear demand"""
+        return self.demand(action_profile) * (action_profile - self.cost)
+
+    def demand(self, action_profile: np.ndarray) -> np.ndarray:
+        """Compute demand for each agent given the prices (actions) of firms (agents)"""
+        raise NotImplementedError
+
+
+class BertrandStandard(Bertrand):
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        cost: Tuple[float],
+        maximum_demand: float = 1.0,
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        self.maximum_demand = maximum_demand
+        self.cost = np.array(cost)
+        super().__init__(
+            n_agents=n_agents, n_discr=n_discr, cost=cost, interval=interval
+        )
+        self.name = "bertrand_standard"
+
+    def demand(self, action_profile: np.ndarray) -> np.ndarray:
+        """Compute (standard) demand for each agent given the prices (actions) of firms (agents)"""
+        # compute allocation (similar to auctions)
+        action_min = np.isclose(
+            np.array(action_profile), np.array(action_profile).min()
+        )
+        allocation = action_min / action_min.sum()
+        return self.maximum_demand * allocation * (1 - action_profile)
+
+
+class BertrandLinear(Bertrand):
     """Bertrand Competition with linear demand (Hansen et al., 2021)"""
 
     def __init__(
@@ -253,14 +302,9 @@ class BertrandLinear(EconGame):
         self.alpha = np.array(alpha)
         self.beta = np.array(beta)
         self.gamma = gamma
-        self.cost = np.array(cost)
 
         super().__init__(n_agents, n_discr, interval)
         self.name = "bertrand_linear"
-
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for Bertrand Competition with linear demand"""
-        return self.demand(action_profile) * (action_profile - self.cost)
 
     def demand(self, action_profile: np.ndarray) -> np.ndarray:
         """Compute demand for each agent given the prices (actions) of firms (agents)"""
