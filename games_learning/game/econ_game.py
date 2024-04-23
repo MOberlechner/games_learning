@@ -250,6 +250,8 @@ class Bertrand(EconGame):
         super().__init__(n_agents, n_discr, interval)
         self.name = "bertrand"
 
+        assert len(cost) == n_agents
+
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """ex-post utility for Bertrand Competition with linear demand"""
         return self.demand(action_profile) * (action_profile - self.cost)
@@ -285,6 +287,43 @@ class BertrandStandard(Bertrand):
         return self.maximum_demand * allocation * (1 - action_profile)
 
 
+class BertrandLogit(Bertrand):
+    """Bertrand Competition with Logit Demand Function (Calvano et al.)"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        cost: Tuple[float],
+        alpha: Tuple[float],
+        mu: float,
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        """
+        Args:
+           n_agents (int): number of agents
+           n_discr (int): discretization parameter action space
+           cost (Tuple[float]): cost parameter for linear production costs
+           alpha (Tuple[float]): product quality index (last index for external supplier)
+           mu (float): product differentiation
+           interval (Tuple[float], optional): interval of action space. Defaults to (0.0,1.0).
+
+        """
+        self.alpha = np.array(alpha)
+        self.mu = mu
+        super().__init__(
+            n_agents=n_agents, n_discr=n_discr, cost=cost, interval=interval
+        )
+        self.name = "bertrand_logit"
+
+        assert len(alpha) == n_agents + 1
+
+    def demand(self, action_profile: np.ndarray) -> np.ndarray:
+        """Compute demand for each agent given the prices (actions) of firms (agents)"""
+        action_exp = np.exp((self.alpha[:-1] - action_profile) / self.mu)
+        return action_exp / (action_exp.sum() + np.exp(self.alpha[-1] / self.mu))
+
+
 class BertrandLinear(Bertrand):
     """Bertrand Competition with linear demand (Hansen et al., 2021)"""
 
@@ -292,10 +331,10 @@ class BertrandLinear(Bertrand):
         self,
         n_agents: int,
         n_discr: int,
+        cost: Tuple[float],
         alpha: Tuple[float],
         beta: Tuple[float],
         gamma: float,
-        cost: Tuple[float],
         interval: Tuple[float] = (0.0, 1.0),
     ):
 
