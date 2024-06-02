@@ -176,7 +176,7 @@ class RandomMatrixGame(MatrixGame):
         n_actions: List[int],
         seed: int = None,
         distribution: str = "uniform",
-        gamma: int = 0
+        gamma: int = 0,
     ):
         """Create random matrix game ”
 
@@ -185,7 +185,9 @@ class RandomMatrixGame(MatrixGame):
             n_actions (list[int]): _description_
             gamme (int): only relevant if you use "multivariant" as the distribution
         """
-        payoff_matrix = self.create_matrices(n_agents, n_actions, seed, distribution, gamma)
+        payoff_matrix = self.create_matrices(
+            n_agents, n_actions, seed, distribution, gamma
+        )
         assert n_agents == len(n_actions)
 
         super().__init__(n_agents, payoff_matrix)
@@ -198,7 +200,7 @@ class RandomMatrixGame(MatrixGame):
         return f"Random(agents={self.n_agents}, actions={self.n_actions}, seed={self.seed})"
 
     def create_matrices(
-        self, n_agents: int, n_actions: list, seed: int, distribution: str, gamma = 0
+        self, n_agents: int, n_actions: list, seed: int, distribution: str, gamma=0
     ):
         """Generate random payoff matrix
 
@@ -218,16 +220,23 @@ class RandomMatrixGame(MatrixGame):
         elif distribution == "normal":
             return rng.normal(loc=0.0, scale=1.0, size=dimension)
         elif distribution == "multivariant":
-            return rng.multivariate_normal(mean=[0] * n_agents, cov=self.create_covariance_matrix(n_agents, n_actions, gamma), size=dimension, check_valid='raise')
+            return rng.multivariate_normal(
+                mean=[0] * n_agents,
+                cov=self.create_covariance_matrix(n_agents, n_actions[0], gamma),
+                size=dimension,
+                check_valid="raise",
+            )
         else:
             raise NotImplementedError(f"Distribition {distribution} not implemented")
 
     def create_covariance_matrix(agents: int, actions: int, gamma: int):
-        cov = np.ones((agents, agents)) * gamma / ((agents - 1) * actions ** (agents - 1))
+        cov = (
+            np.ones((agents, agents)) * gamma / ((agents - 1) * actions ** (agents - 1))
+        )
         for i in range(agents):
             cov[i][i] = 1 / (actions ** (agents - 1))
         return cov
-                    
+
 
 # ------------------------------ HELPERFUNCTIONS ------------------------------ #
 
