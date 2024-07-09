@@ -15,7 +15,7 @@ The implementation focuses on
 
 |  | Description |
 | ------- | ----------- |
-| [**hodge**](./projects/hodge/)<br>| Analyze connection of potentialness and convergence of learning algorithms in matrix games. We focus on randomly generated games and complete-information economic games (e.g., auctions, contests). |
+| [**tbd**](./projects/)<br>| ... |
 
 
 
