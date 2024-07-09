@@ -9,6 +9,7 @@ from games_learning.game.matrix_game import MatrixGame
 
 # ------------------------- PURE NASH EQUILIBRIUM ----------------------------- #
 
+
 def find_pure_nash_equilibrium(game: MatrixGame) -> Dict[str, List[tuple]]:
     action_profiles = generate_action_profiles(game.n_actions)
     weak_ne, strict_ne = [], []
@@ -60,7 +61,10 @@ def check_pure_nash_equilibrium(
 
 # ------------------------- CORRELATED EQUILIBRIUM ----------------------------- #
 
-def find_correlated_equilibrium(game: MatrixGame, coarse: bool=True, objective: np.ndarray=None) -> np.ndarray:
+
+def find_correlated_equilibrium(
+    game: MatrixGame, coarse: bool = True, objective: np.ndarray = None
+) -> np.ndarray:
     """Compute one (coarse) correlated equilibrium (C)CE that maximizes some given objective function
 
     Args:
@@ -70,34 +74,41 @@ def find_correlated_equilibrium(game: MatrixGame, coarse: bool=True, objective: 
 
     Returns:
         np.ndarray: (coarse) correlated equilibrium
-    """ 
-    
+    """
+
     # create new problem
     lp = LpProblem("correlated_equilibrium", LpMaximize)
-    
+
     # create variables
     action_profiles = list(generate_action_profiles(game.n_actions))
     x = LpVariable.dicts(
         "x",
         (action_profiles),
-        lowBound = 0,
-        upBound = 1,
+        lowBound=0,
+        upBound=1,
     )
-    
+
     # probability constraint
-    lp += (lpSum([x[a] for a in action_profiles]) == 1)    
-    
+    lp += lpSum([x[a] for a in action_profiles]) == 1
+
     # CCE constraints
     if coarse:
         for i in game.agents:
             for j in range(game.n_actions[i]):
-                exp_util = lpSum([x[a]*game.payoff_matrix[i][a] for a in action_profiles])
-                exp_util_j = lpSum([x[a]*game.payoff_matrix[i][a[:i] + (j,) + a[i+1:]] for a in action_profiles])
-                lp += (exp_util >= exp_util_j)
+                exp_util = lpSum(
+                    [x[a] * game.payoff_matrix[i][a] for a in action_profiles]
+                )
+                exp_util_j = lpSum(
+                    [
+                        x[a] * game.payoff_matrix[i][a[:i] + (j,) + a[i + 1 :]]
+                        for a in action_profiles
+                    ]
+                )
+                lp += exp_util >= exp_util_j
     else:
         print("CE not implemented")
         raise NotImplementedError
-    
+
     # optimize
     status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
     if LpStatus[lp.status] != "Optimal":
@@ -106,12 +117,3 @@ def find_correlated_equilibrium(game: MatrixGame, coarse: bool=True, objective: 
 
     results = np.array([x[a].varValue for a in action_profiles])
     return results.reshape(game.n_actions)
-                
-                
-                
-            
-                
-        
-        
-    
-    
