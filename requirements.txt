@@ -7,3 +7,4 @@ ipykernel
 pre-commit
 black
 isort
+pulp
