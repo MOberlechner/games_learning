@@ -1,5 +1,5 @@
 from itertools import product
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -243,10 +243,13 @@ class Bertrand(EconGame):
         self,
         n_agents: int,
         n_discr: int,
-        cost: Tuple[float],
+        cost: Union[float, Tuple[float, ...]],
         interval: Tuple[float] = (0.0, 1.0),
     ):
+        # if parameter is single number, we assume symmetry
+        cost = (cost,) * n_agents if isinstance(cost, (int, float)) else cost
         self.cost = np.array(cost)
+
         super().__init__(n_agents, n_discr, interval)
         self.name = "bertrand"
 
@@ -264,12 +267,11 @@ class BertrandStandard(Bertrand):
         self,
         n_agents: int,
         n_discr: int,
-        cost: Tuple[float],
+        cost: Union[float, Tuple[float, ...]],
+        interval: Tuple[float],
         maximum_demand: float = 1.0,
-        interval: Tuple[float] = (0.0, 1.0),
     ):
         self.maximum_demand = maximum_demand
-        self.cost = np.array(cost)
         super().__init__(
             n_agents=n_agents, n_discr=n_discr, cost=cost, interval=interval
         )
@@ -286,24 +288,28 @@ class BertrandStandard(Bertrand):
 
 
 class BertrandLinear(Bertrand):
-    """Bertrand Competition with linear demand (Hansen et al., 2021)"""
+    """Bertrand Competition with linear demand"""
 
     def __init__(
         self,
         n_agents: int,
         n_discr: int,
-        alpha: Tuple[float],
-        beta: Tuple[float],
+        cost: Union[float, Tuple[float, ...]],
+        interval: Tuple[float],
+        alpha: Union[float, Tuple[float, ...]],
+        beta: Union[float, Tuple[float, ...]],
         gamma: float,
-        cost: Tuple[float],
-        interval: Tuple[float] = (0.0, 1.0),
     ):
-
+        # if parameter is single number, we assume symmetry
+        alpha = (alpha,) * n_agents if isinstance(alpha, (int, float)) else alpha
+        beta = (beta,) * n_agents if isinstance(beta, (int, float)) else beta
         self.alpha = np.array(alpha)
         self.beta = np.array(beta)
         self.gamma = gamma
 
-        super().__init__(n_agents, n_discr, interval)
+        super().__init__(
+            n_agents=n_agents, n_discr=n_discr, cost=cost, interval=interval
+        )
         self.name = "bertrand_linear"
 
     def demand(self, action_profile: np.ndarray) -> np.ndarray:
@@ -320,3 +326,33 @@ class BertrandLinear(Bertrand):
     def sum_prices_opponents(self, action_profile: np.ndarray, agent: int) -> float:
         """Compute sum of prices of all agents except for agent (index)"""
         return action_profile[:agent].sum() + action_profile[agent + 1 :].sum()
+
+
+class BertrandLogit(Bertrand):
+    """Bertrand Competition with logit demand"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        cost: Union[float, Tuple[float, ...]],
+        interval: Tuple[float],
+        alpha: Union[float, Tuple[float, ...]],
+        mu: Union[float, Tuple[float, ...]],
+    ):
+        # if parameter is single number, we assume symmetry
+        alpha = (alpha,) * n_agents if isinstance(alpha, (int, float)) else alpha
+        mu = (mu,) * n_agents if isinstance(mu, (int, float)) else mu
+        self.alpha = np.array(alpha)
+        self.mu = np.array(mu)
+
+        super().__init__(
+            n_agents=n_agents, n_discr=n_discr, cost=cost, interval=interval
+        )
+        self.name = "bertrand_logit"
+
+    def demand(self, action_profile: np.ndarray) -> np.ndarray:
+        """Compute demand for each agent given the prices (actions) of firms (agents).
+        external influence is fixed on 1"""
+        actions_exp = np.exp((self.alpha - action_profile) / self.mu)
+        return actions_exp / (actions_exp.sum() + 1)
