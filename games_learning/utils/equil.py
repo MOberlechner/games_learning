@@ -80,10 +80,36 @@ def find_correlated_equilibrium(
     Returns:
         np.ndarray: (coarse) correlated equilibrium
     """
+    # create objective
+    if objective is None:
+        objective = np.ones(game.n_actions)
+    assert objective.shape == tuple(game.n_actions)
 
-    # create new problem
+    # create lp
+    x, lp = create_cce_lp(game, coarse=coarse, objective=objective)
+
+    # optimize
+    status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
+    if LpStatus[lp.status] != "Optimal":
+        print("This should not happen. Fix this!")
+        return None
+    results = np.array([x[a].varValue for a in x.keys()])
+    return results.reshape(game.n_actions)
+
+
+def create_cce_lp(game: MatrixGame, coarse: bool = True, objective: np.ndarray = None):
+    """create LP to compute (C)CE for matrix game
+
+    Args:
+        game (MatrixGame): matrix game
+        coarse (bool, optional): CCE or CE. Defaults to True.
+        objective (np.ndarray, optional): objective to select certain (C)CE. Defaults to None.
+
+    Returns:
+        Variables, LP (pulp)
+    """
+    # create problem
     lp = LpProblem("correlated_equilibrium", LpMaximize)
-
     # create variables
     action_profiles = list(generate_action_profiles(game.n_actions))
     x = LpVariable.dicts(
@@ -92,17 +118,10 @@ def find_correlated_equilibrium(
         lowBound=0,
         upBound=1,
     )
-
     # objective function
-    if objective is None:
-        lp += lpSum(x[a] for a in action_profiles)
-    else:
-        assert objective.shape == tuple(game.n_actions)
-        lp += lpSum(x[a] * objective[a] for a in action_profiles)
-
+    lp += lpSum(x[a] * objective[a] for a in action_profiles)
     # probability constraint
     lp += lpSum([x[a] for a in action_profiles]) == 1
-
     # CCE constraints
     if coarse:
         for i in game.agents:
@@ -117,7 +136,6 @@ def find_correlated_equilibrium(
                     ]
                 )
                 lp += exp_util >= exp_util_j
-
     # CE constraints
     else:
         for i in game.agents:
@@ -138,11 +156,34 @@ def find_correlated_equilibrium(
                         ]
                     )
                     lp += exp_util_j1 >= exp_util_j2
+    return x, lp
 
-    # optimize
-    status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
-    if LpStatus[lp.status] != "Optimal":
-        print("This should not happen. Fix this!")
-        return None
-    results = np.array([x[a].varValue for a in action_profiles])
-    return results.reshape(game.n_actions)
+
+def get_support_correlated_equilibria(
+    game: MatrixGame, coarse: bool = True, atol: float = 1e-10
+) -> np.ndarray:
+    """Returns if action_profile is part of some (C)CE
+
+    Args:
+        game (MatrixGame): matrix game
+        coarse (bool, optional): CCE or CE. Defaults to True.
+
+    Returns:
+        np.ndarray
+    """
+    result = np.zeros(game.n_actions, dtype=bool)
+    action_profiles = generate_action_profiles(game.n_actions)
+
+    for a in action_profiles:
+        objective = np.zeros(game.n_actions)
+        objective[a] = 1
+        x, lp = create_cce_lp(game, coarse=coarse, objective=objective)
+        # optimize
+        status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
+        if LpStatus[lp.status] != "Optimal":
+            print("This should not happen. Fix this!")
+            return None
+        result[a] = x[a].varValue > atol
+        del x, lp
+
+    return result
