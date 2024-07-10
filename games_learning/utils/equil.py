@@ -88,6 +88,13 @@ def find_correlated_equilibrium(
         upBound=1,
     )
 
+    # objective function
+    if objective is None:
+        lp += lpSum(x[a] for a in action_profiles)
+    else:
+        assert objective.shape == tuple(game.n_actions)
+        lp += lpSum(x[a] * objective[a] for a in action_profiles)
+
     # probability constraint
     lp += lpSum([x[a] for a in action_profiles]) == 1
 
@@ -114,6 +121,5 @@ def find_correlated_equilibrium(
     if LpStatus[lp.status] != "Optimal":
         print("This should not happen. Fix this!")
         return None
-
     results = np.array([x[a].varValue for a in action_profiles])
     return results.reshape(game.n_actions)
