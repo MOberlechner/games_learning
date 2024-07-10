@@ -1,3 +1,4 @@
+""" Test computation of (coarse) correlated equilibria """
 import numpy as np
 import pytest
 
