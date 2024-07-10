@@ -10,11 +10,13 @@ from games_learning.game.matrix_game import MatrixGame
 # ------------------------- PURE NASH EQUILIBRIUM ----------------------------- #
 
 
-def find_pure_nash_equilibrium(game: MatrixGame) -> Dict[str, List[tuple]]:
+def find_pure_nash_equilibrium(
+    game: MatrixGame, atol: float = 1e-10
+) -> Dict[str, List[tuple]]:
     action_profiles = generate_action_profiles(game.n_actions)
     weak_ne, strict_ne = [], []
     for a in action_profiles:
-        result = check_pure_nash_equilibrium(a, game.payoff_matrix, game.n_actions)
+        result = check_pure_nash_equilibrium(action_profile=a, game=game, atol=atol)
         if result == 0:
             weak_ne.append(a)
         elif result == 1:
@@ -35,22 +37,25 @@ def generate_deviations(action_profile: Tuple[int], agent: int, n_actions_agent:
 
 
 def check_pure_nash_equilibrium(
-    action_profile: Tuple[int], payoff_matrix: Tuple[np.ndarray], n_actions: List[int]
+    action_profile: Tuple[int], game: MatrixGame, atol: float = 1e-10
 ) -> int:
-    """return -1 if not pure equilibria, 0 if weak, and 1 if strict equilibrium"""
-    n_agents = len(n_actions)
+    """return -1 if not pure equilibria, 0 if weak, and 1 if strict equilibrium
+    atol is necessary due to numerical inaccuracies.
+    """
+    assert isinstance(game, MatrixGame)
+
     is_pure = 1
-    for i in range(n_agents):
+    for i in game.agents:
         payoff_deviations = np.array(
             tuple(
-                payoff_matrix[i][d]
-                for d in generate_deviations(action_profile, i, n_actions[i])
+                game.payoff_matrix[i][d]
+                for d in generate_deviations(action_profile, i, game.n_actions[i])
             )
         )
-        if np.any(payoff_matrix[i][action_profile] < payoff_deviations):
+        if np.any(game.payoff_matrix[i][action_profile] < payoff_deviations - atol):
             # one deviation yields higher payoff -> no equilibrium
             return -1
-        elif np.all(payoff_matrix[i][action_profile] > payoff_deviations):
+        elif np.all(game.payoff_matrix[i][action_profile] > payoff_deviations + atol):
             # for this agent, action is strictly better
             is_pure *= 1
         else:
@@ -112,9 +117,27 @@ def find_correlated_equilibrium(
                     ]
                 )
                 lp += exp_util >= exp_util_j
+
+    # CE constraints
     else:
-        print("CE not implemented")
-        raise NotImplementedError
+        for i in game.agents:
+            for j1 in range(game.n_actions[i]):
+                for j2 in range(game.n_actions[i]):
+                    exp_util_j1 = lpSum(
+                        [
+                            x[a] * game.payoff_matrix[i][a]
+                            for a in action_profiles
+                            if a[i] == j1
+                        ]
+                    )
+                    exp_util_j2 = lpSum(
+                        [
+                            x[a] * game.payoff_matrix[i][a[:i] + (j2,) + a[i + 1 :]]
+                            for a in action_profiles
+                            if a[i] == j1
+                        ]
+                    )
+                    lp += exp_util_j1 >= exp_util_j2
 
     # optimize
     status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
