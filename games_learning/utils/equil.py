@@ -21,7 +21,7 @@ def find_pure_nash_equilibrium(
             weak_ne.append(a)
         elif result == 1:
             strict_ne.append(a)
-    return {"weak_ne": weak_ne, "strict_ne": strict_ne}
+    return {"weak_ne": weak_ne, "strict_ne": strict_ne, "ne": strict + weak}
 
 
 def generate_action_profiles(n_actions: List[int]) -> Tuple[tuple]:
