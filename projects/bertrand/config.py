@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
 from games_learning.game.econ_game import (
     Bertrand,
     BertrandLinear,
@@ -5,41 +8,26 @@ from games_learning.game.econ_game import (
     BertrandStandard,
 )
 
+PATH_TO_RESULTS = "projects/bertrand/results/"
+FORMAT = "pdf"
+COLORS = ["#0571b0", "#92c5de", "#f4a582", "#ca0020"]
+CMAP = LinearSegmentedColormap.from_list("colormap", COLORS)
+FIGSIZE_S = (3.4, 3.4)
+FIGSIZE_R = (3.4, 3 / 4 * 3.4)
 
-def get_game(demand: str, n_discr: int, n_agents: int = 2) -> Bertrand:
-    """Create Bertrand Game"""
-
-    if demand == "standard":
-        return BertrandStandard(
-            n_agents=n_agents,
-            n_discr=n_discr,
-            cost=0.0,
-            interval=(0.1, 1.0),
-            maximum_demand=1.0,
-        )
-
-    elif demand == "linear":
-        return BertrandLinear(
-            n_agents=n_agents,
-            n_discr=n_discr,
-            cost=0.0,
-            interval=(0.1, 1.0),
-            alpha=0.48,
-            beta=0.9,
-            gamma=0.6,
-        )
-
-    elif demand == "logit":
-        return BertrandLogit(
-            n_agents=n_agents,
-            n_discr=n_discr,
-            cost=1.0,
-            interval=(1.0, 2.5),
-            alpha=2.0,
-            mu=0.25,
-        )
-
-    else:
-        raise ValueError(
-            f"demand model {demand} unknown. Choose from: standard, linear, logit"
-        )
+CONFIG_GAMES = {
+    "standard": {"cost": 0.0, "interval": (0.1, 1.0), "maximum_demand": 1.0},
+    "linear": {
+        "cost": 0.0,
+        "interval": (0.1, 1.0),
+        "alpha": 0.48,
+        "beta": 0.9,
+        "gamma": 0.6,
+    },
+    "logit": {
+        "cost": 1.0,
+        "interval": (1.0, 2.5),
+        "alpha": 2.0,
+        "mu": 0.25,
+    },
+}
