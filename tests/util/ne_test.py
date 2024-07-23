@@ -16,7 +16,7 @@ def test_pne_matching_pennies():
     ]
     game = MatrixGame(n_agents, payoff_matrix)
     pne = find_pure_nash_equilibrium(game, atol=1e-10)
-    assert pne == {"weak_ne": [], "strict_ne": []}
+    assert pne == {"weak_ne": [], "strict_ne": [], "ne": []}
 
 
 def test_pne_prisoners_dilemma():
@@ -25,7 +25,7 @@ def test_pne_prisoners_dilemma():
     payoff_matrix = [np.array([[4, 1], [5, 2]]), np.array([[4, 5], [1, 2]])]
     game = MatrixGame(n_agents, payoff_matrix)
     pne = find_pure_nash_equilibrium(game, atol=1e-10)
-    assert pne == {"weak_ne": [], "strict_ne": [(1, 1)]}
+    assert pne == {"weak_ne": [], "strict_ne": [(1, 1)], "ne": [(1, 1)]}
 
 
 def test_pne_battle_of_sexes():
@@ -34,11 +34,12 @@ def test_pne_battle_of_sexes():
     payoff_matrix = [np.array([[2, 0], [0, 1]]), np.array([[1, 0], [0, 2]])]
     game = MatrixGame(n_agents, payoff_matrix)
     pne = find_pure_nash_equilibrium(game, atol=1e-10)
-    assert pne == {"weak_ne": [], "strict_ne": [(0, 0), (1, 1)]}
+    assert pne == {"weak_ne": [], "strict_ne": [(0, 0), (1, 1)], "ne": [(0, 0), (1, 1)]}
 
 
 def test_pne_fpsb():
     # FPSB has weak and strict ne (under certain discretization)
     game = FPSB(n_agents=2, n_discr=10, valuations=(1, 1), interval=(0, 0.9))
     pne = find_pure_nash_equilibrium(game, atol=1e-10)
-    assert pne == {"weak_ne": [(8, 8)], "strict_ne": [(9, 9)]}
+    print(pne)
+    assert pne == {"weak_ne": [(8, 8)], "strict_ne": [(9, 9)], "ne": [(9, 9), (8, 8)]}
