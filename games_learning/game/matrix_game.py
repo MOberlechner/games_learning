@@ -19,17 +19,16 @@ class MatrixGame:
         - best response
         - utility loss
         - init_strategies
-
     """
 
     def __init__(
-        self, n_agents: int, payoff_matrix: Tuple[np.ndarray], name: str = "matrix_game"
+        self, n_agents: int, payoff_matrix: np.ndarray, name: str = "matrix_game"
     ):
         """Matrix Game
 
         Args:
             n_agents (int): _description_
-            payoff_matrices (Tuple[np.ndarray]): list of payoff matrices
+            payoff_matrices (np.ndarray): indices: player, action player 1, action player 2, ...
             name (str, optional): _description_. Defaults to "".
         """
         self.name = name
@@ -42,7 +41,7 @@ class MatrixGame:
         assert len(payoff_matrix[0].shape) == n_agents
 
     def __repr__(self) -> str:
-        return f"MatrixGame(agents={self.n_agents},actions={self.n_actions})"
+        return f"MatrixGame({self.name},{self.n_actions})"
 
     def gradient(self, strategies: List, agent: int) -> np.ndarray:
         """Gradient Function
