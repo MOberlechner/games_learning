@@ -51,9 +51,7 @@ class EconGame(MatrixGame):
             ]
         )
         # reformat array
-        util_arr_form = util_arr.T.reshape([n_agents] + [n_discr] * n_agents)
-        # return as tuple
-        return tuple([util for util in util_arr_form])
+        return util_arr.T.reshape([n_agents] + [n_discr] * n_agents)
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
         """compute ex-post utility given a action profile"""
