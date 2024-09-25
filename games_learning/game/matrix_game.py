@@ -175,6 +175,7 @@ class RandomMatrixGame(MatrixGame):
         n_actions: List[int],
         seed: int = None,
         distribution: str = "uniform",
+        parameters: dict = {},
     ):
         """Create random matrix game ”
 
@@ -182,19 +183,27 @@ class RandomMatrixGame(MatrixGame):
             n_agents (_type_): _description_
             n_actions (list[int]): _description_
         """
-        payoff_matrix = self.create_matrices(n_agents, n_actions, seed, distribution)
+        payoff_matrix = self.create_matrices(
+            n_agents, n_actions, seed, distribution, parameters
+        )
         assert n_agents == len(n_actions)
 
         super().__init__(n_agents, payoff_matrix)
         self.name = "random_matrix_game"
         self.seed = seed
         self.distribution = distribution
+        self.parameters = parameters
 
     def __repr__(self) -> str:
         return f"Random(agents={self.n_agents}, actions={self.n_actions}, seed={self.seed})"
 
     def create_matrices(
-        self, n_agents: int, n_actions: list, seed: int, distribution: str
+        self,
+        n_agents: int,
+        n_actions: list,
+        seed: int,
+        distribution: str,
+        parameters: dict,
     ):
         """Generate random payoff matrix
 
@@ -203,6 +212,7 @@ class RandomMatrixGame(MatrixGame):
             n_actions (list): number of actions for each agents
             seed (int): seed for random generator
             distribution (str): distribution of entries of payoff matrices
+            parameters (str): parameters for distribution
 
         Returns:
             np.ndarray: contains all payoff matrices
@@ -211,6 +221,15 @@ class RandomMatrixGame(MatrixGame):
         rng = np.random.default_rng(seed)
         if distribution == "uniform":
             return rng.random(size=dimension, dtype=np.float64)
+        if distribution == "uniform_int":
+            if ("lb" in parameters) and ("ub" in parameters):
+                return rng.integers(
+                    low=parameters["lb"], high=parameters["ub"] + 1, size=dimension
+                )
+            else:
+                raise ValueError(
+                    "Specify lb (lower bound) and ub (upper bound) in parameters"
+                )
         elif distribution == "normal":
             return rng.normal(loc=0.0, scale=1.0, size=dimension)
         else:
