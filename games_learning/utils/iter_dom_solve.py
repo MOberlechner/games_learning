@@ -13,7 +13,7 @@ def iterated_dominance_solver(
     """run iterated dominance solver"""
     successful_iter = True
     reduced_game = deepcopy(game)
-    removed_actions = {agent: [] for agent in game.agents}
+    removed_actions_index = {agent: [] for agent in game.agents}
 
     while successful_iter:
         counter_actions_removed = 0
@@ -23,10 +23,11 @@ def iterated_dominance_solver(
                 reduced_game = remove_action(
                     reduced_game, agent, dom_action, strict, atol
                 )
-                removed_actions[agent].append(dom_action)
+                removed_actions_index[agent].append(dom_action)
                 counter_actions_removed += 1
         successful_iter = counter_actions_removed > 0
 
+    removed_actions = reconstruct_removed_actions(game, removed_actions_index)
     return reduced_game, removed_actions
 
 
@@ -94,3 +95,17 @@ def generate_opponents_action_profiles(game: MatrixGame, agent: int) -> Tuple[tu
 def generate_action_profiles(opponent_profile: Tuple[int], agent: int, index: int):
     """Given a strategy profile, create all deviations of agent i"""
     return opponent_profile[:agent] + (index,) + opponent_profile[agent:]
+
+
+def reconstruct_removed_actions(game: MatrixGame, removed_actions_index) -> dict:
+    """get the removed actions from the initial game"""
+    removed_actions = {i: [] for i in game.agents}
+    for i in game.agents:
+        actions = list(range(game.n_actions[i]))
+        for idx in removed_actions_index[i]:
+            removed_actions[i].append(actions.pop(idx))
+    return removed_actions
+
+
+def print_reduced_game(game: MatrixGame, removed_actions) -> None:
+    """print removed actions from original game"""
