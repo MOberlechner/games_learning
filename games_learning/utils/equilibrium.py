@@ -187,3 +187,36 @@ def get_support_correlated_equilibria(
         del x, lp
 
     return result
+
+
+def get_supported_actions_correlated_equilibria(
+    game: MatrixGame, coarse: bool = True, atol: float = 1e-10
+) -> np.ndarray:
+    """Returns if action_profile is part of some (C)CE
+
+    Args:
+        game (MatrixGame): matrix game
+        coarse (bool, optional): CCE or CE. Defaults to True.
+
+    Returns:
+        np.ndarray
+    """
+    supp_actions = {i: [] for i in game.agents}
+    for i in game.agents:
+        for j in range(game.n_actions[i]):
+
+            # create objective
+            objective = np.zeros(game.n_actions)
+            slices = [slice(None)] * game.n_agents
+            slices[i] = j
+            objective[tuple(slices)] = 1
+
+            # optimize
+            x, lp = create_cce_lp(game, coarse=coarse, objective=objective)
+            status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
+            if LpStatus[lp.status] != "Optimal":
+                print("This should not happen. Fix this!")
+                return None
+            supp_actions[i].append(value(lp.objective) > atol)
+            del x, lp
+    return supp_actions
