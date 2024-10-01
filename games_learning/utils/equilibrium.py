@@ -5,18 +5,28 @@ from typing import Dict, List, Tuple
 import numpy as np
 from pulp import *
 
-from games_learning.game.matrix_game import MatrixGame
-
 # ------------------------- PURE NASH EQUILIBRIUM ----------------------------- #
 
 
-def find_pure_nash_equilibrium(
-    game: MatrixGame, atol: float = 1e-10
+def get_pure_nash_equilibrium(
+    payoff_matrix: Tuple[np.ndarray], atol: float = 1e-10
 ) -> Dict[str, List[tuple]]:
-    action_profiles = generate_action_profiles(game.n_actions)
+    """Find all pure Nash equilibria (by brute force)
+
+    Args:
+        payoff_matrix (Tuple[np.ndarray]): payoff matrices from matrix game
+        atol (float, optional): tolerance to distinguish between weak and strict NE. Defaults to 1e-10.
+
+    Returns:
+        Dict[str, List[tuple]]: returns "strict_ne", "weak_ne", and all "ne"
+    """
+    n_actions = payoff_matrix[0].shape
+    action_profiles = generate_action_profiles(n_actions)
     weak_ne, strict_ne = [], []
     for a in action_profiles:
-        result = check_pure_nash_equilibrium(action_profile=a, game=game, atol=atol)
+        result = check_pure_nash_equilibrium(
+            action_profile=a, payoff_matrix=payoff_matrix, atol=atol
+        )
         if result == 0:
             weak_ne.append(a)
         elif result == 1:
@@ -37,25 +47,26 @@ def generate_deviations(action_profile: Tuple[int], agent: int, n_actions_agent:
 
 
 def check_pure_nash_equilibrium(
-    action_profile: Tuple[int], game: MatrixGame, atol: float = 1e-10
+    action_profile: Tuple[int], payoff_matrix: Tuple[np.ndarray], atol: float = 1e-10
 ) -> int:
     """return -1 if not pure equilibria, 0 if weak, and 1 if strict equilibrium
     atol is necessary due to numerical inaccuracies.
     """
-    assert isinstance(game, MatrixGame)
+    agents = list(range(len(payoff_matrix)))
+    n_actions = payoff_matrix[0].shape
 
     is_pure = 1
-    for i in game.agents:
+    for i in agents:
         payoff_deviations = np.array(
             tuple(
-                game.payoff_matrix[i][d]
-                for d in generate_deviations(action_profile, i, game.n_actions[i])
+                payoff_matrix[i][d]
+                for d in generate_deviations(action_profile, i, n_actions[i])
             )
         )
-        if np.any(game.payoff_matrix[i][action_profile] < payoff_deviations - atol):
+        if np.any(payoff_matrix[i][action_profile] < payoff_deviations - atol):
             # one deviation yields higher payoff -> no equilibrium
             return -1
-        elif np.all(game.payoff_matrix[i][action_profile] > payoff_deviations + atol):
+        elif np.all(payoff_matrix[i][action_profile] > payoff_deviations + atol):
             # for this agent, action is strictly better
             is_pure *= 1
         else:
@@ -67,26 +78,29 @@ def check_pure_nash_equilibrium(
 # ------------------------- CORRELATED EQUILIBRIUM ----------------------------- #
 
 
-def find_correlated_equilibrium(
-    game: MatrixGame, coarse: bool = True, objective: np.ndarray = None
+def get_correlated_equilibrium(
+    payoff_matrix: Tuple[np.ndarray], coarse: bool = True, objective: np.ndarray = None
 ) -> np.ndarray:
     """Compute one (coarse) correlated equilibrium (C)CE that maximizes some given objective function
 
     Args:
-        game (MatrixGame): matrix game
+        payoff_matrix (Tuple[np.ndarray]): payoff matrices from matrix game
         coarse (bool, optional): If True we compute CCE else CE. Defaults to True.
         objective (np.ndarray, optional): Objective to choose specific (C)CE. Defaults to None.
 
     Returns:
         np.ndarray: (coarse) correlated equilibrium
     """
+    n_actions = payoff_matrix[0].shape
     # create objective
     if objective is None:
-        objective = np.ones(game.n_actions)
-    assert objective.shape == tuple(game.n_actions)
+        objective = np.ones(n_actions)
+    assert objective.shape == tuple(n_actions)
 
     # create lp
-    x, lp = create_cce_lp(game, coarse=coarse, objective=objective)
+    x, lp = create_cce_lp(
+        payoff_matrix=payoff_matrix, coarse=coarse, objective=objective
+    )
 
     # optimize
     status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
@@ -94,24 +108,30 @@ def find_correlated_equilibrium(
         print("This should not happen. Fix this!")
         return None
     results = np.array([x[a].varValue for a in x.keys()])
-    return results.reshape(game.n_actions)
+    return results.reshape(n_actions)
 
 
-def create_cce_lp(game: MatrixGame, coarse: bool = True, objective: np.ndarray = None):
+def create_cce_lp(
+    payoff_matrix: Tuple[np.ndarray], coarse: bool = True, objective: np.ndarray = None
+):
     """create LP to compute (C)CE for matrix game
 
     Args:
-        game (MatrixGame): matrix game
+        payoff_matrix ( Tuple[np.ndarray]): payoff matrix of matrix game
         coarse (bool, optional): CCE or CE. Defaults to True.
         objective (np.ndarray, optional): objective to select certain (C)CE. Defaults to None.
 
     Returns:
         Variables, LP (pulp)
     """
+    # parameters
+    n_actions = payoff_matrix[0].shape
+    agents = list(range(len(payoff_matrix)))
+
     # create problem
     lp = LpProblem("correlated_equilibrium", LpMaximize)
     # create variables
-    action_profiles = list(generate_action_profiles(game.n_actions))
+    action_profiles = list(generate_action_profiles(n_actions))
     x = LpVariable.dicts(
         "x",
         (action_profiles),
@@ -124,33 +144,31 @@ def create_cce_lp(game: MatrixGame, coarse: bool = True, objective: np.ndarray =
     lp += lpSum([x[a] for a in action_profiles]) == 1
     # CCE constraints
     if coarse:
-        for i in game.agents:
-            for j in range(game.n_actions[i]):
-                exp_util = lpSum(
-                    [x[a] * game.payoff_matrix[i][a] for a in action_profiles]
-                )
+        for i in agents:
+            for j in range(n_actions[i]):
+                exp_util = lpSum([x[a] * payoff_matrix[i][a] for a in action_profiles])
                 exp_util_j = lpSum(
                     [
-                        x[a] * game.payoff_matrix[i][a[:i] + (j,) + a[i + 1 :]]
+                        x[a] * payoff_matrix[i][a[:i] + (j,) + a[i + 1 :]]
                         for a in action_profiles
                     ]
                 )
                 lp += exp_util >= exp_util_j
     # CE constraints
     else:
-        for i in game.agents:
-            for j1 in range(game.n_actions[i]):
-                for j2 in range(game.n_actions[i]):
+        for i in agents:
+            for j1 in range(n_actions[i]):
+                for j2 in range(n_actions[i]):
                     exp_util_j1 = lpSum(
                         [
-                            x[a] * game.payoff_matrix[i][a]
+                            x[a] * payoff_matrix[i][a]
                             for a in action_profiles
                             if a[i] == j1
                         ]
                     )
                     exp_util_j2 = lpSum(
                         [
-                            x[a] * game.payoff_matrix[i][a[:i] + (j2,) + a[i + 1 :]]
+                            x[a] * payoff_matrix[i][a[:i] + (j2,) + a[i + 1 :]]
                             for a in action_profiles
                             if a[i] == j1
                         ]
@@ -160,24 +178,27 @@ def create_cce_lp(game: MatrixGame, coarse: bool = True, objective: np.ndarray =
 
 
 def get_support_correlated_equilibria(
-    game: MatrixGame, coarse: bool = True, atol: float = 1e-10
+    payoff_matrix: Tuple[np.ndarray], coarse: bool = True, atol: float = 1e-10
 ) -> np.ndarray:
     """Returns if action_profile is part of some (C)CE
 
     Args:
-        game (MatrixGame): matrix game
+        payoff_matrix (Tuple[np.ndarray]): payoff matrices from matrix game
         coarse (bool, optional): CCE or CE. Defaults to True.
 
     Returns:
         np.ndarray
     """
-    result = np.zeros(game.n_actions, dtype=bool)
-    action_profiles = generate_action_profiles(game.n_actions)
+    n_actions = payoff_matrix[0].shape
+    result = np.zeros(n_actions, dtype=bool)
+    action_profiles = generate_action_profiles(n_actions)
 
     for a in action_profiles:
-        objective = np.zeros(game.n_actions)
+        objective = np.zeros(n_actions)
         objective[a] = 1
-        x, lp = create_cce_lp(game, coarse=coarse, objective=objective)
+        x, lp = create_cce_lp(
+            payoff_matrix=payoff_matrix, coarse=coarse, objective=objective
+        )
         # optimize
         status = lp.solve(pulp.PULP_CBC_CMD(msg=False))
         if LpStatus[lp.status] != "Optimal":
@@ -190,24 +211,27 @@ def get_support_correlated_equilibria(
 
 
 def get_supported_actions_correlated_equilibria(
-    game: MatrixGame, coarse: bool = True, atol: float = 1e-10
+    payoff_matrix: Tuple[np.ndarray], coarse: bool = True, atol: float = 1e-10
 ) -> np.ndarray:
     """Returns if action_profile is part of some (C)CE
 
     Args:
-        game (MatrixGame): matrix game
+        payoff_matrix (Tuple[np.ndarray]): payoff matrices from matrix game
         coarse (bool, optional): CCE or CE. Defaults to True.
 
     Returns:
         np.ndarray
     """
-    supp_actions = {i: [] for i in game.agents}
-    for i in game.agents:
-        for j in range(game.n_actions[i]):
+    agents = list(range(len(payoff_matrix)))
+    n_actions = payoff_matrix[0].shape
+
+    supp_actions = {i: [] for i in agents}
+    for i in agents:
+        for j in range(n_actions[i]):
 
             # create objective
-            objective = np.zeros(game.n_actions)
-            slices = [slice(None)] * game.n_agents
+            objective = np.zeros(n_actions)
+            slices = [slice(None)] * n_agents
             slices[i] = j
             objective[tuple(slices)] = 1
 
