@@ -2,6 +2,9 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
+import games_learning.utils.dominance as domin
+import games_learning.utils.equilibrium as equil
+
 
 class MatrixGame:
     """Class for Matrix-Game G = (N, A, u)
@@ -13,6 +16,11 @@ class MatrixGame:
     We consider the mixed extension of the game.
 
     Methods:
+        - get_pne: get all pure Nash equilibria
+        - get_ce: compute a correlated equilibrium
+        - get_cce: compute a coarse correlated equilibrium
+        - get_supp_ce: which action profiles are supported by some ce
+        - get_supp_cce: which action profiles are supperted by some cce
 
     """
 
@@ -36,6 +44,88 @@ class MatrixGame:
 
     def __repr__(self) -> str:
         return f"MatrixGame({self.name},{self.n_actions})"
+
+    def get_pne(self, atol: float = 1e-9) -> dict:
+        """compute all pure Nash equilibria (PNE) for game
+
+        Args:
+            atol (float, optional): tol for (strict) inequalities. Defaults to 1e-10.
+
+        Returns:
+            dict: returns dict with "weak_ne", "strict_ne" and all "ne"
+        """
+        return equil.get_pure_nash_equilibrium(self.payoff_matrix, atol=atol)
+
+    def get_ce(self, objective: np.ndarray = None) -> np.ndarray:
+        """compute a correlated equilibrium CE
+
+        Args:
+            objective (np.ndarray, optional): objective to choose a (C)CE. If no objective is specified, all action profiles get equal weight. Defaults to None.
+
+        Returns:
+            np.ndarray: CE (probability distribution over all action profiles)
+        """
+        return equil.get_correlated_equilibrium(
+            self.payoff_matrix, coarse=False, objective=objective
+        )
+
+    def get_cce(self, objective: np.ndarray = None) -> np.ndarray:
+        """compute a coarse correlated equilibrium CCE
+
+        Args:
+            objective (np.ndarray, optional): objective to choose a (C)CE. If no objective is specified, all action profiles get equal weight. Defaults to None.
+
+        Returns:
+            np.ndarray: CCE (probability distribution over all action profiles)
+        """
+        return equil.get_correlated_equilibrium(
+            self.payoff_matrix, coarse=True, objective=objective
+        )
+
+    def get_supp_ce(self, atol: float = 1e-9) -> np.ndarray:
+        """check which action profiles are supported by a ce, i.e., is there any CE that puts a strictly positive probability mass (> atol) on action profiles
+
+        Args:
+            atol (float, optional): probability mass has to be larger than atol. Defaults to 1e-10.
+
+        Returns:
+            np.ndarray: binary array with entry for each action profile
+        """
+        return equil.get_support_correlated_equilibria(
+            self.payoff_matrix, coarse=False, atol=atol
+        )
+
+    def get_supp_cce(self, atol: float = 1e-9) -> np.ndarray:
+        """check which action profiles are supported by a cce, i.e., is there any CCE that puts a strictly positive probability mass (> atol) on action profiles
+
+        Args:
+            atol (float, optional): probability mass has to be larger than atol. Defaults to 1e-10.
+
+        Returns:
+            np.ndarray: binary array with entry for each action profile
+        """
+        return equil.get_support_correlated_equilibria(self.payoff_matrix, True, atol)
+
+    def get_undominated_actions(
+        self, dominance: str = "strict", atol: float = 1e-9, print: bool = False
+    ) -> dict:
+        """returns actions that survive iterated removal of dominated actions, i.e., serially undominated actions. we distinguish betweem two cases of dominance:
+         - stong: action is dominated by another pure action (for opponents' actions)
+        - strict: action is dominated by a mixed strategy (for all opponents' actions)
+        In both cases, we assume that the inequalities are strictly satisfied, i.e., no weak dominance.
+
+        Args:
+            dominance (str, optional): choose between strict and strong. Defaults to "strict".
+
+        Returns:
+            dict: contains all undominated actions for agents
+        """
+        (
+            reduced_payoff_matrix,
+            removed_actions,
+            remaining_actions,
+        ) = domin.iterated_dominance_solver(self.payoff_matrix, dominance, atol, print)
+        return remaining_actions
 
 
 class ExampleMatrixGames(MatrixGame):
@@ -82,6 +172,11 @@ class ExampleMatrixGames(MatrixGame):
                 np.array([[self.beta - 1, 0], [self.beta, 0]]),
             )
             return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})"
+
+        else:
+            raise ValueError(
+                f"matrix game {setting} not available. Choose from: matching_pennis, battle_of_sexes, prisoners_dilemma, jordan_game"
+            )
 
 
 class RandomMatrixGame(MatrixGame):
