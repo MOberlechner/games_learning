@@ -1,4 +1,6 @@
-from typing import Union
+from typing import Tuple, Union
+
+import numpy as np
 
 from games_learning.game.matrix_game import MatrixGame
 
@@ -41,7 +43,7 @@ class Strategy:
         Returns:
             np.ndarray: gradient for agent
         """
-        strategies_opp = remove_index(strategies.x, agent)
+        strategies_opp = remove_index(self.x, agent)
         subscript = get_einsum_subscripts(agent, self.n_agents)
         return np.einsum(subscript, *strategies_opp, self.game.payoff_matrix[agent])
 
@@ -57,7 +59,7 @@ class Strategy:
         """
         if gradient is None:
             gradient = self.gradient(agent)
-        return gradient.dot(strategies.x[agent])
+        return gradient.dot(self.x[agent])
 
     def best_response(self, agent: int, gradient: np.ndarray = None) -> np.ndarray:
         """compute best response for agent
