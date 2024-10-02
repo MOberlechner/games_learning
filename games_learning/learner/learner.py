@@ -53,3 +53,34 @@ class Learner:
             np.ndarray: updated mixed strategy for agent
         """
         raise NotImplementedError
+
+
+class BestResponse(Learner):
+    def __init__(self) -> None:
+        """Best Response Dynamics"""
+        self.name = "best_response"
+
+    def __repr__(self) -> str:
+        return "BestResponse"
+
+    def update(
+        self,
+        strategy: Strategy,
+        gradients: List[np.ndarray],
+        iter: int,
+    ) -> List[np.ndarray]:
+        """update strategies"""
+        return [
+            strategy.best_response(agent=i, gradient=gradients[i])
+            for i in strategy.agents
+        ]
+
+    def update_agent(
+        self,
+        strategy: Strategy,
+        agent: int,
+        gradient: np.ndarray,
+        iter: int,
+    ) -> np.ndarray:
+        """update a single strategy"""
+        return strategy.best_response(agent=i, gradient=gradient)
