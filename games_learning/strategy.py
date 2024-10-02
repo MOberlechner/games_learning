@@ -119,29 +119,34 @@ class Strategy:
         Returns:
             List[np.ndarray]: profile of mixed strategies
         """
+        if method.split("_")[-1] == "sym":
+            method = method.split("_")[0]
+            symmetric = True
+        else:
+            symmetric = False
 
         if method == "equal":
-            return list(
+            x = list(
                 np.ones(self.n_actions[i]) / self.n_actions[i] for i in self.agents
             )
 
         elif method == "random":
-            return list(
-                np.random.dirichlet((1,) * self.n_actions[i]) for i in self.agents
-            )
+            x = list(np.random.dirichlet((1,) * self.n_actions[i]) for i in self.agents)
 
         elif method == "uniform":
             uniform_numbers = list(
                 np.random.rand(self.n_actions[i]) for i in self.agents
             )
-            return list(
-                uniform_numbers[i] / uniform_numbers[i].sum() for i in self.agents
-            )
+            x = list(uniform_numbers[i] / uniform_numbers[i].sum() for i in self.agents)
 
         else:
             raise ValueError(
-                f"init method {method} not available. Choose from equal, random, or uniform."
+                f"init method {method} not available. Choose from equal, random, or uniform. You can add a '_sym' at the end if you want agents to be symmetrically initialized."
             )
+
+        if symmetric:
+            x = [x[0] for i in self.agents]
+        return x
 
 
 # ------------------------------ HELPERFUNCTIONS ------------------------------ #
