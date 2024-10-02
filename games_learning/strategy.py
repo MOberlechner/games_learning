@@ -30,9 +30,9 @@ class Strategy:
         return f"Strategies(game:{self.game.name}, {self.n_actions})"
 
     @property
-    def y(self) -> Tuple[np.ndarray]:
+    def y(self) -> List[np.ndarray]:
         """gradients for all agents"""
-        return tuple(self.gradient(i) for i in self.agents)
+        return [self.gradient(i) for i in self.agents]
 
     def gradient(self, agent: int) -> np.ndarray:
         """compute gradient of expected utility for agent
@@ -108,7 +108,7 @@ class Strategy:
                 f"Choose between methods: rel, abs. method={method} is not available"
             )
 
-    def init_strategies(self, method) -> Tuple[np.ndarray]:
+    def init_strategies(self, method) -> List[np.ndarray]:
         """generate initial mixed strategies
 
         Args:
@@ -117,24 +117,24 @@ class Strategy:
                 from the probability simplex.
 
         Returns:
-            Tuple[np.ndarray]: profile of mixed strategies
+            List[np.ndarray]: profile of mixed strategies
         """
 
         if method == "equal":
-            return tuple(
+            return list(
                 np.ones(self.n_actions[i]) / self.n_actions[i] for i in self.agents
             )
 
         elif method == "random":
-            return tuple(
+            return list(
                 np.random.dirichlet((1,) * self.n_actions[i]) for i in self.agents
             )
 
         elif method == "uniform":
-            uniform_numbers = tuple(
-                np.randrom.rand(self.n_actions[i]) for i in self.agents
+            uniform_numbers = list(
+                np.random.rand(self.n_actions[i]) for i in self.agents
             )
-            return tuple(
+            return list(
                 uniform_numbers[i] / uniform_numbers[i].sum() for i in self.agents
             )
 

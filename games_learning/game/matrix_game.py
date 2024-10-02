@@ -147,15 +147,22 @@ class ExampleMatrixGames(MatrixGame):
 
     def create_setting(self, setting, parameter):
         if setting == "matching_pennies":
-            payoff_matrix = (np.array([[1, -1], [-1, 1]]), np.array([[-1, 1], [1, -1]]))
+            payoff_matrix = [np.array([[1, -1], [-1, 1]]), np.array([[-1, 1], [1, -1]])]
             return payoff_matrix, setting
 
         elif setting == "battle_of_sexes":
-            payoff_matrix = (np.array([[5, 1], [2, 6]]), np.array([[6, 1], [2, 5]]))
+            payoff_matrix = [np.array([[5, 1], [2, 6]]), np.array([[6, 1], [2, 5]])]
             return payoff_matrix, setting
 
         elif setting == "prisoners_dilemma":
-            payoff_matrix = (np.array([[4, 1], [5, 2]]), np.array([[4, 5], [1, 2]]))
+            payoff_matrix = [np.array([[4, 1], [5, 2]]), np.array([[4, 5], [1, 2]])]
+            return payoff_matrix, setting
+
+        elif setting == "rock_paper_scissors":
+            payoff_matrix = [
+                np.array([[0, -1, 1], [1, 0, -1], [-1, 1, 0]]),
+                np.array([[0, 1, -1], [-1, 0, 1], [1, -1, 0]]),
+            ]
             return payoff_matrix, setting
 
         elif setting == "jordan_game":
@@ -167,15 +174,15 @@ class ExampleMatrixGames(MatrixGame):
                 alpha, beta = rng.random(size=2, dtype=np.float64)
             else:
                 alpha, beta = np.random.uniform(size=2)
-            payoff_matrix = (
+            payoff_matrix = [
                 np.array([[1 - self.alpha, -self.alpha], [0, 0]]),
                 np.array([[self.beta - 1, 0], [self.beta, 0]]),
-            )
+            ]
             return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})"
 
         else:
             raise ValueError(
-                f"matrix game {setting} not available. Choose from: matching_pennis, battle_of_sexes, prisoners_dilemma, jordan_game"
+                f"matrix game {setting} not available. Choose from: matching_pennis, battle_of_sexes, prisoners_dilemma, rock-paper-scissors, jordan_game"
             )
 
 
