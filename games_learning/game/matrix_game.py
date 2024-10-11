@@ -182,7 +182,7 @@ class ExampleMatrixGames(MatrixGame):
 
         else:
             raise ValueError(
-                f"matrix game {setting} not available. Choose from: matching_pennis, battle_of_sexes, prisoners_dilemma, rock-paper-scissors, jordan_game"
+                f"matrix game {setting} not available. Choose from: matching_pennies, battle_of_sexes, prisoners_dilemma, rock-paper-scissors, jordan_game"
             )
 
 

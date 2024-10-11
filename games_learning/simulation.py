@@ -31,7 +31,7 @@ class Simulator:
         self.number_iter = max_iter
 
     def run(self, show_bar: bool = True, simultaneous: bool = True) -> None:
-        """run (simulataneous) learning dynamics
+        """run (simultaneous) learning dynamics
 
         Args:
             show_bar (bool): show progress bar. Defaluts to True.
@@ -60,11 +60,9 @@ class Simulator:
 
             else:
                 # update strategies sequentially
-                for i in self.agent:
+                for i in self.agents:
                     gradient = self.strategy.gradient(agent=i)
-                    xi_new = self.learner.update_agent(
-                        self.strategy, agent, gradient, t
-                    )
+                    xi_new = self.learner.update_agent(self.strategy, i, gradient, t)
                     self.strategy.x[i] = xi_new
 
         return self.log_result()

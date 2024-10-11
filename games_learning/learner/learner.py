@@ -69,10 +69,18 @@ class BestResponse(Learner):
         gradients: List[np.ndarray],
         iter: int,
     ) -> List[np.ndarray]:
-        """update strategies"""
+        """update all strategies (simultaneous)
+
+        Args:
+            strategies (Tuple): agents' current strategies
+            gradients (List[np.ndarray]): agents' gradients
+            iter (int): current iteration
+
+        Returns:
+            List[np.ndarray]: updated strategies
+        """
         return [
-            strategy.best_response(agent=i, gradient=gradients[i])
-            for i in strategy.agents
+            self.update_agent(strategy, i, gradients[i], iter) for i in strategy.agents
         ]
 
     def update_agent(
@@ -82,5 +90,5 @@ class BestResponse(Learner):
         gradient: np.ndarray,
         iter: int,
     ) -> np.ndarray:
-        """update a single strategy"""
-        return strategy.best_response(agent=i, gradient=gradient)
+        """update a single strategy (sequential)"""
+        return strategy.best_response(agent=agent, gradient=gradient)
