@@ -236,7 +236,7 @@ class ExampleMatrixGames(MatrixGame):
                 ["Rock", "Paper", "Scissors"],
                 ["Rock", "Paper", "Scissors"],
             ]
-            return payoff_matrix, setting
+            return payoff_matrix, setting, name_actions
 
         elif setting == "jordan_game":
             if ("alpha" in parameter) and ("beta" in parameter):
@@ -251,7 +251,7 @@ class ExampleMatrixGames(MatrixGame):
                 np.array([[1 - self.alpha, -self.alpha], [0, 0]]),
                 np.array([[self.beta - 1, 0], [self.beta, 0]]),
             ]
-            return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})"
+            return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})", None
 
         else:
             raise ValueError(
