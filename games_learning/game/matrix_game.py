@@ -1,3 +1,4 @@
+import importlib.util
 from typing import List, Tuple, Union
 
 import numpy as np
@@ -126,6 +127,29 @@ class MatrixGame:
             remaining_actions,
         ) = domin.iterated_dominance_solver(self.payoff_matrix, dominance, atol, print)
         return remaining_actions
+
+    def get_potentialness(self, decomposition: bool = False):
+        """returns potentialness of game
+
+        Args:
+            decomposition (bool, optional): If True, we additionally return the decomposition of the game. Defaults to False.
+
+        Returns:
+            float: potentialness
+        """
+        if importlib.util.find_spec("games_decomposition") is None:
+            print("Install package games_decomposition!")
+            return None
+
+        elif not decomposition:
+            from games_decomposition.game import Game
+
+            hodge = Game(self.n_actions, save_load=False)
+            hodge.compute_flow_decomposition_matrix(self.payoff_matrix)
+            return hodge.flow_metric
+
+        else:
+            raise NotImplementedError
 
 
 class ExampleMatrixGames(MatrixGame):
