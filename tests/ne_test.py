@@ -18,6 +18,11 @@ def test_pne_prisoners_dilemma():
     game = ExampleMatrixGames(setting="prisoners_dilemma")
     pne = game.get_pne()
     assert pne == {"weak_ne": [], "strict_ne": [(1, 1)], "ne": [(1, 1)]}
+    assert game.get_named_actions(pne) == {
+        "weak_ne": [],
+        "strict_ne": [("Silent", "Silent")],
+        "ne": [("Silent", "Silent")],
+    }
 
 
 def test_pne_battle_of_sexes():

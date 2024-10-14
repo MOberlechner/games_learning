@@ -208,26 +208,33 @@ class ExampleMatrixGames(MatrixGame):
         setting: str,
         parameter: dict = None,
     ):
-        payoff_matrix, name = self.create_setting(setting, parameter)
-        super().__init__(payoff_matrix, name)
+        payoff_matrix, name, name_actions = self.create_setting(setting, parameter)
+        super().__init__(payoff_matrix, name, name_actions)
 
     def create_setting(self, setting, parameter):
         if setting == "matching_pennies":
             payoff_matrix = [np.array([[1, -1], [-1, 1]]), np.array([[-1, 1], [1, -1]])]
-            return payoff_matrix, setting
+            name_actions = [["Heads", "Tails"], ["Heads", "Tails"]]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "battle_of_sexes":
             payoff_matrix = [np.array([[5, 1], [2, 6]]), np.array([[6, 1], [2, 5]])]
-            return payoff_matrix, setting
+            name_actions = [["Baseball", "Softball"], ["Baseball", "Softball"]]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "prisoners_dilemma":
             payoff_matrix = [np.array([[4, 1], [5, 2]]), np.array([[4, 5], [1, 2]])]
-            return payoff_matrix, setting
+            name_actions = [["Confess", "Silent"], ["Confess", "Silent"]]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "rock_paper_scissors":
             payoff_matrix = [
                 np.array([[0, -1, 1], [1, 0, -1], [-1, 1, 0]]),
                 np.array([[0, 1, -1], [-1, 0, 1], [1, -1, 0]]),
+            ]
+            name_actions = [
+                ["Rock", "Paper", "Scissors"],
+                ["Rock", "Paper", "Scissors"],
             ]
             return payoff_matrix, setting
 
