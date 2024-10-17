@@ -1,5 +1,5 @@
 import importlib.util
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -25,7 +25,12 @@ class MatrixGame:
 
     """
 
-    def __init__(self, payoff_matrix: np.ndarray, name: str = "matrix_game"):
+    def __init__(
+        self,
+        payoff_matrix: np.ndarray,
+        name: str = "matrix_game",
+        name_actions: List[str] = None,
+    ):
         """Matrix Game
 
         Args:
@@ -37,6 +42,7 @@ class MatrixGame:
         self.agents = list(range(self.n_agents))
         self.n_actions = list(payoff_matrix[0].shape)
         self.payoff_matrix = payoff_matrix
+        self.name_actions = name_actions
 
         if not np.all(
             [len(payoff_matrix[i].shape) == self.n_agents for i in self.agents]
@@ -55,7 +61,8 @@ class MatrixGame:
         Returns:
             dict: returns dict with "weak_ne", "strict_ne" and all "ne"
         """
-        return equil.get_pure_nash_equilibrium(self.payoff_matrix, atol=atol)
+        pne = equil.get_pure_nash_equilibrium(self.payoff_matrix, atol=atol)
+        return pne
 
     def get_ce(self, objective: np.ndarray = None) -> np.ndarray:
         """compute a correlated equilibrium CE
@@ -92,9 +99,10 @@ class MatrixGame:
         Returns:
             np.ndarray: binary array with entry for each action profile
         """
-        return equil.get_support_correlated_equilibria(
+        supp_ce = equil.get_support_correlated_equilibria(
             self.payoff_matrix, coarse=False, atol=atol
         )
+        return supp_ce
 
     def get_supp_cce(self, atol: float = 1e-9) -> np.ndarray:
         """check which action profiles are supported by a cce, i.e., is there any CCE that puts a strictly positive probability mass (> atol) on action profiles
@@ -105,7 +113,10 @@ class MatrixGame:
         Returns:
             np.ndarray: binary array with entry for each action profile
         """
-        return equil.get_support_correlated_equilibria(self.payoff_matrix, True, atol)
+        supp_cce = equil.get_support_correlated_equilibria(
+            self.payoff_matrix, True, atol
+        )
+        return supp_cce
 
     def get_undominated_actions(
         self, dominance: str = "strict", atol: float = 1e-9, print: bool = False
@@ -151,6 +162,37 @@ class MatrixGame:
         else:
             raise NotImplementedError
 
+    def get_named_actions(self, numbered_actions: Dict) -> Dict:
+        """instead of numbered actions, we return the names of the actions.
+
+        Args:
+            numbered_actions (Union[Dict]): list or dict with actions or action profiles. Output from get_pne etc.
+
+        Returns:
+            Union[Dict]: same as input, but with numbers
+        """
+        # no names available
+        if self.name_actions is None:
+            return numbered_actions
+
+        elif isinstance(numbered_actions, dict):
+            named_actions = {}
+            # dictionaries contain lists of actions for each agent (e.g. get_undominated_actions)
+            if list(numbered_actions.keys()) == self.agents:
+                for i in self.agents:
+                    named_actions[i] = [
+                        self.name_actions[i][a] for a in numbered_actions[i]
+                    ]
+            else:
+                # dictionaries contain action profiles (e.g. get_pne)
+                for key, vals in numbered_actions.items():
+                    named_actions[key] = [
+                        tuple(map(lambda lst, i: lst[i], self.name_actions, profiles))
+                        for profiles in vals
+                    ]
+
+        return named_actions
+
 
 class ExampleMatrixGames(MatrixGame):
     """This class contains some examples of matrix games, such as
@@ -166,28 +208,35 @@ class ExampleMatrixGames(MatrixGame):
         setting: str,
         parameter: dict = None,
     ):
-        payoff_matrix, name = self.create_setting(setting, parameter)
-        super().__init__(payoff_matrix, name)
+        payoff_matrix, name, name_actions = self.create_setting(setting, parameter)
+        super().__init__(payoff_matrix, name, name_actions)
 
     def create_setting(self, setting, parameter):
         if setting == "matching_pennies":
             payoff_matrix = [np.array([[1, -1], [-1, 1]]), np.array([[-1, 1], [1, -1]])]
-            return payoff_matrix, setting
+            name_actions = [["Heads", "Tails"], ["Heads", "Tails"]]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "battle_of_sexes":
             payoff_matrix = [np.array([[5, 1], [2, 6]]), np.array([[6, 1], [2, 5]])]
-            return payoff_matrix, setting
+            name_actions = [["Baseball", "Softball"], ["Baseball", "Softball"]]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "prisoners_dilemma":
             payoff_matrix = [np.array([[4, 1], [5, 2]]), np.array([[4, 5], [1, 2]])]
-            return payoff_matrix, setting
+            name_actions = [["Confess", "Silent"], ["Confess", "Silent"]]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "rock_paper_scissors":
             payoff_matrix = [
                 np.array([[0, -1, 1], [1, 0, -1], [-1, 1, 0]]),
                 np.array([[0, 1, -1], [-1, 0, 1], [1, -1, 0]]),
             ]
-            return payoff_matrix, setting
+            name_actions = [
+                ["Rock", "Paper", "Scissors"],
+                ["Rock", "Paper", "Scissors"],
+            ]
+            return payoff_matrix, setting, name_actions
 
         elif setting == "jordan_game":
             if ("alpha" in parameter) and ("beta" in parameter):
@@ -202,7 +251,7 @@ class ExampleMatrixGames(MatrixGame):
                 np.array([[1 - self.alpha, -self.alpha], [0, 0]]),
                 np.array([[self.beta - 1, 0], [self.beta, 0]]),
             ]
-            return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})"
+            return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})", None
 
         else:
             raise ValueError(
