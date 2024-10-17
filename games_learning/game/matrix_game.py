@@ -222,10 +222,22 @@ class ExampleMatrixGames(MatrixGame):
             name_actions = [["Baseball", "Softball"], ["Baseball", "Softball"]]
             return payoff_matrix, setting, name_actions
 
+        elif setting == "stag_hunt":
+            payoff_matrix = [np.array([[5, 0], [4, 2]]), np.array([[5, 4], [0, 2]])]
+            name_actions = [["Stag", "Hare"], ["Stag", "Hare"]]
+            return payoff_matrix, setting, name_actions
+
         elif setting == "prisoners_dilemma":
             payoff_matrix = [np.array([[4, 1], [5, 2]]), np.array([[4, 5], [1, 2]])]
             name_actions = [["Confess", "Silent"], ["Confess", "Silent"]]
             return payoff_matrix, setting, name_actions
+
+        elif setting == "shapley_game":
+            payoff_matrix = [
+                np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]]),
+            ]
+            return payoff_matrix, setting, None
 
         elif setting == "rock_paper_scissors":
             payoff_matrix = [
@@ -248,10 +260,14 @@ class ExampleMatrixGames(MatrixGame):
             else:
                 alpha, beta = np.random.uniform(size=2)
             payoff_matrix = [
-                np.array([[1 - self.alpha, -self.alpha], [0, 0]]),
-                np.array([[self.beta - 1, 0], [self.beta, 0]]),
+                np.array([[1 - alpha, -alpha], [0, 0]]),
+                np.array([[beta - 1, 0], [beta, 0]]),
             ]
-            return payoff_matrix, f"jordan_game(alpha={alpha}, beta={beta})", None
+            return (
+                payoff_matrix,
+                f"jordan_game(alpha={alpha:.5f}, beta={beta:.5f})",
+                None,
+            )
 
         else:
             raise ValueError(
@@ -286,7 +302,6 @@ class RandomMatrixGame(MatrixGame):
 
     def create_matrices(
         self,
-        n_agents: int,
         n_actions: list,
         seed: int,
         distribution: str,
@@ -295,7 +310,6 @@ class RandomMatrixGame(MatrixGame):
         """Generate random payoff matrix
 
         Args:
-            n_agents (int): number of agents
             n_actions (list): number of actions for each agents
             seed (int): seed for random generator
             distribution (str): distribution of entries of payoff matrices
