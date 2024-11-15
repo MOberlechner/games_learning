@@ -14,7 +14,7 @@ SETTINGS = [(2, 2), (2, 4), (2, 12), (2, 24), (4, 2), (4, 4), (8, 2), (10, 2)]
 
 # Data
 PATH_TO_DATA = "projects/hodge/data/"
-PATH_TO_RESULTS = "projects/hodge/figures_ecai/"
+PATH_TO_RESULTS = "projects/hodge/figures/"
 
 # Visualization
 plt.rcParams["font.family"] = "Times New Roman"

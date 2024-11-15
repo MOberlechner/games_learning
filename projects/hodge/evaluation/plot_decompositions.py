@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from decomposition.game import Game
+from games_decomposition.game import Game
 
 from games_learning.game.econ_game import FPSB, SPSB, AllPay, Contest
 from projects.hodge.configs import *
