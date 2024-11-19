@@ -59,6 +59,13 @@ class EconGame(MatrixGame):
         """compute ex-post utility given a action profile"""
         raise NotImplementedError
 
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """compute ex-post utility for Bayesian Game, i.e., with types"""
+        print("Implement method to use for bayesian games")
+        raise NotImplementedError
+
 
 class FPSB(EconGame):
     """Complete-Information First-Price Sealed Bid with random tie-breaking and fixed value v=1"""
@@ -77,14 +84,20 @@ class FPSB(EconGame):
         assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for FPSB"""
+        """ex-post utility for complete-information FPSB"""
+        return self.ex_post_utility_bayesian(action_profile, self.valuation)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """ex-post utility for FPSB (with types)"""
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
         # compute payment (first-price)
         first_price = action_profile.max()
         # compute ex-post utility
-        return allocation * (self.valuation - first_price)
+        return allocation * (type_profile - first_price)
 
 
 class SPSB(EconGame):
@@ -104,14 +117,20 @@ class SPSB(EconGame):
         assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for SPSB"""
+        """ex-post utility for complete-information SPSB"""
+        return self.ex_post_utility_bayesian(action_profile, self.valuation)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """ex-post utility for SPSB (with types)"""
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
         # compute payment (second-price)
         second_price = np.sort(action_profile)[-2]
         # compute ex-post utility
-        return allocation * (self.valuation - second_price)
+        return allocation * (type_profile - second_price)
 
 
 class AlphaSB(EconGame):
@@ -133,7 +152,13 @@ class AlphaSB(EconGame):
         assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for AlphaSB"""
+        """ex-post utility for complete-information AlphaSB"""
+        return self.ex_post_utility_bayesian(action_profile, self.valuation)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """ex-post utility for AlphaSB (with types)"""
         # compute allocation
         action_max = np.isclose(
             np.array(action_profile), np.array(action_profile).max()
@@ -144,7 +169,7 @@ class AlphaSB(EconGame):
         second_price = np.sort(action_profile)[-2]
         payment = (1 - self.alpha) * first_price + self.alpha * second_price
         # compute ex-post utility
-        return allocation * (self.valuation - payment)
+        return allocation * (type_profile - payment)
 
 
 class AllPay(EconGame):
@@ -164,12 +189,18 @@ class AllPay(EconGame):
         assert len(valuations) == n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for complete-information All-Pay Auction"""
+        return self.ex_post_utility_bayesian(action_profile, self.valuation)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
         """ex-post utility for All-Pay Auction"""
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
         # compute ex-post utility
-        return allocation * self.valuation - action_profile
+        return allocation * type_profile - action_profile
 
 
 class Contest(EconGame):
@@ -202,10 +233,16 @@ class Contest(EconGame):
             return np.ones(n_agents) / n_agents
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for Tullock-Contest"""
+        """ex-post utility for complete-information Tullock-Contest"""
+        return self.ex_post_utility_bayesian(action_profile, self.valuation)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """ex-post utility for Tullock-Contest (with types)"""
         allocation = self.allocation(action_profile)
         payments = action_profile
-        return allocation * self.valuation - payments
+        return allocation * type_profile - payments
 
 
 class Cournot(EconGame):
@@ -222,7 +259,7 @@ class Cournot(EconGame):
     ):
         self.a = a
         self.b = b
-        self.cost = cost
+        self.cost = np.array(cost)
         assert len(b) == n_agents
         assert len(cost) == n_agents
 
@@ -230,8 +267,14 @@ class Cournot(EconGame):
         self.name = "cournot"
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for Cournot Competition"""
-        return action_profile * (self.price(action_profile) - np.array(self.cost))
+        """ex-post utility for complete-information Cournot Competition"""
+        return self.ex_post_utility_bayesian(action_profile, self.cost)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """ex-post utility for Cournot Competition (with types)"""
+        return action_profile * (self.price(action_profile) - type_profile)
 
     def price(self, action_profile: np.ndarray) -> float:
         """Compute price given quantities (actions) of firms (agents)"""
@@ -254,8 +297,14 @@ class Bertrand(EconGame):
         self.name = "bertrand"
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        """ex-post utility for Bertrand Competition with linear demand"""
-        return self.demand(action_profile) * (action_profile - self.cost)
+        """ex-post utility for complete-information Bertrand Competition"""
+        return self.ex_post_utility_bayesian(action_profile, self.cost)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
+        """ex-post utility for Bertrand Competition (with types)"""
+        return self.demand(action_profile) * (action_profile - type_profile)
 
     def demand(self, action_profile: np.ndarray) -> np.ndarray:
         """Compute demand for each agent given the prices (actions) of firms (agents)"""
