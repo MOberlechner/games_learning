@@ -49,6 +49,8 @@ class MatrixGame:
         ):
             raise ValueError("error in dimensions of payoff-matrix")
 
+        self.min_payoffs = np.array([np.min(payoff_matrix[i]) for i in self.agents])
+
     def __repr__(self) -> str:
         return f"MatrixGame({self.name},{self.n_actions})"
 

@@ -100,7 +100,9 @@ class Strategy:
             best_response = self.best_response(agent, gradient)
 
         if method == "rel":
-            return 1 - gradient.dot(self.x[agent]) / gradient.dot(best_response)
+            return 1 - (gradient.dot(self.x[agent]) - self.game.min_payoffs[agent]) / (
+                gradient.dot(best_response) - self.game.min_payoffs[agent]
+            )
         elif method == "abs":
             return gradient.dot(best_response) - gradient.dot(self.x[agent])
         else:
