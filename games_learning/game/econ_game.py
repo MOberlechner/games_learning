@@ -213,9 +213,11 @@ class Contest(EconGame):
         valuations: Tuple[float],
         interval: Tuple[float] = (0.0, 1.0),
         csf_param: float = 1.0,
+        epsilon: float = 0.0,
     ):
         self.csf_param = csf_param
         self.valuation = np.array(valuations)
+        self.epsilon = epsilon
         super().__init__(n_agents, n_discr, interval)
         self.name = "contest"
 
@@ -227,7 +229,7 @@ class Contest(EconGame):
         if np.any(action_profile > 0):
             return (
                 action_profile**self.csf_param
-                / (action_profile**self.csf_param).sum()
+                / (action_profile**self.csf_param + self.epsilon).sum()
             )
         else:
             return np.ones(n_agents) / n_agents
@@ -405,3 +407,67 @@ class BertrandLogit(Bertrand):
         external influence is fixed on 1"""
         actions_exp = np.exp((self.alpha - action_profile) / self.mu)
         return actions_exp / (actions_exp.sum() + 1)
+
+
+class WarOfAttrition(EconGame):
+    """War of Attrition"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        valuations: np.ndarray,
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        self.valuations = valuations
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "war_of_attrition"
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        # compute allocation
+        action_max = np.array(action_profile) == np.array(action_profile).max()
+        allocation = action_max / action_max.sum()
+        # compute payment (second-price)
+        second_price = np.sort(action_profile)[-2]
+        # compute ex-post utility
+        return allocation * self.valuations - second_price
+
+
+class TragedyOfCommons(EconGame):
+    """Tragedy of Commons"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "tragedy_of_commons"
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        # compute ex-post utility
+        return action_profile * (1 - action_profile.sum())
+
+
+class PublicGood(EconGame):
+    """Public Good"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        # self.f = lambda x: 1.2 * x / n_agents
+        # self.g = lambda x: x
+        self.f = lambda x: 10 * x if x <= 15 else 10 * x - (x - 15) ** 2
+        self.g = lambda x: 2 * x
+
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "public_good"
+
+    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        # compute ex-post utility
+        total_contribution = action_profile.sum()
+        return self.f(total_contribution) - self.g(action_profile)
