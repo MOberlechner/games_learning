@@ -56,9 +56,10 @@ class Learner:
 
 
 class BestResponse(Learner):
-    def __init__(self) -> None:
+    def __init__(self, tie_breaking: str = "lowest") -> None:
         """Best Response Dynamics"""
         self.name = "best_response"
+        self.tie_breaking = tie_breaking
 
     def __repr__(self) -> str:
         return "BestResponse"
@@ -91,4 +92,6 @@ class BestResponse(Learner):
         iter: int,
     ) -> np.ndarray:
         """update a single strategy (sequential)"""
-        return strategy.best_response(agent=agent, gradient=gradient)
+        return strategy.best_response(
+            agent=agent, gradient=gradient, tie_breaking=self.tie_breaking
+        )

@@ -61,12 +61,15 @@ class Strategy:
             gradient = self.gradient(agent)
         return gradient.dot(self.x[agent])
 
-    def best_response(self, agent: int, gradient: np.ndarray = None) -> np.ndarray:
+    def best_response(
+        self, agent: int, gradient: np.ndarray = None, tie_breaking: str = "lowest"
+    ) -> np.ndarray:
         """compute best response for agent
 
         Args:
             agent (int): agent (index)
             gradient (np.ndarray, optional): If gradient was already computed, we can use it to save time. Otherwise we first have to compute the gradient. Defaults to None.
+            highest_index (bool, optional): If True, return argmax with largest index. Defaults to False.
 
         Returns:
             np.ndarray: best response for agent
@@ -74,7 +77,14 @@ class Strategy:
         if gradient is None:
             gradient = self.gradient(agent)
         best_response = np.zeros_like(gradient)
-        best_response[gradient.argmax()] = 1
+        if tie_breaking == "highest":
+            best_response[np.where(gradient == gradient.max())[0][-1]] = 1
+        elif tie_breaking == "lowest":
+            best_response[gradient.argmax()] = 1
+        else:
+            raise ValueError(
+                f"Choose between tie_breaking: lowest, highest. tie_breaking={tie_breaking} is not available"
+            )
         return best_response
 
     def utility_loss(
