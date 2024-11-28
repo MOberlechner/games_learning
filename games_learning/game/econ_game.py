@@ -427,10 +427,14 @@ class WarOfAttrition(EconGame):
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
-        # compute payment (second-price)
+        # compute payments
+        first_price = action_profile
         second_price = np.sort(action_profile)[-2]
         # compute ex-post utility
-        return allocation * self.valuations - second_price
+        return (
+            allocation * (self.valuations - second_price)
+            - (1 - allocation) * first_price
+        )
 
 
 class TragedyOfCommons(EconGame):
