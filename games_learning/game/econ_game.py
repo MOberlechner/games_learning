@@ -475,3 +475,18 @@ class PublicGood(EconGame):
         # compute ex-post utility
         total_contribution = action_profile.sum()
         return self.f(total_contribution) - self.g(action_profile)
+
+
+class CustomUtilityGame(EconGame):
+    """My game"""
+
+    def __init__(
+        self,
+        n_agents: int,
+        n_discr: int,
+        utility_function: callable,
+        interval: Tuple[float] = (0.0, 1.0),
+    ):
+        self.ex_post_utility = utility_function
+        super().__init__(n_agents, n_discr, interval)
+        self.name = "custom_utility_game"
