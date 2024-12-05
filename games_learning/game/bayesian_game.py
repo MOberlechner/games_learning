@@ -101,7 +101,15 @@ class BayesianEconGame(MatrixGame):
         self.strategies = strategies
         self.n_strategies = len(strategies)
 
-    def print_strategies(self, index: int):
+    def print_strategies(self, indices: List[int]):
+        if isinstance(indices, int):
+            indices = [indices]
+        for index in indices:
+            print(f"Action {index}")
+            self.print_strategy(index)
+            print()
+
+    def print_strategy(self, index: int):
         """print strategy profile for given index"""
         for y in range(
             len(self.bayesian_actions) - 1, -1, -1
