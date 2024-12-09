@@ -2,17 +2,25 @@ import os
 from collections import deque
 from datetime import datetime
 from itertools import product
+from time import time
 
 import numpy as np
 import pandas as pd
-from decomposition.game import Game
+from games_decomposition.game import Game
 from tqdm import tqdm
 
-from games_learning.game.econ_game import FPSB, SPSB, AllPay, Contest, EconGame
+from games_learning.game.econ_game import (
+    FPSB,
+    SPSB,
+    AllPay,
+    Contest,
+    EconGame,
+    WarOfAttrition,
+)
 from games_learning.game.matrix_game import MatrixGame
-from games_learning.learner.learner import Learner, MirrorAscent
+from games_learning.learner.mirror_ascent import MirrorAscent
 from games_learning.simulation import Simulator
-from games_learning.utils.equil import find_pure_nash_equilibrium
+from games_learning.strategy import Strategy
 from projects.hodge.configs import *
 
 
@@ -42,11 +50,11 @@ def run_learning(
 
             # create new game (with given potentialness) from econgame
             payoff_matrix = hodge.create_game_potentialness(potent)
-            game = MatrixGame(n_agents, payoff_matrix)
+            game = MatrixGame(payoff_matrix)
             game.name = label_game
 
             if compute_equil:
-                pure_equil = find_pure_nash_equilibrium(game)
+                pure_equil = game.get_pne()
                 equilibria = {
                     "n_weak_ne": len(pure_equil["weak_ne"]),
                     "n_strict_ne": len(pure_equil["strict_ne"]),
@@ -54,11 +62,11 @@ def run_learning(
                 }
 
             for run in range(n_runs):
-                init_strat = game.init_strategies("random")
+                strategies = Strategy(game, init_method="random")
 
                 # run experiment
-                sim = Simulator(game, learner, MAX_ITER, TOL)
-                result = sim.run(init_strat)
+                sim = Simulator(strategies, learner, max_iter=MAX_ITER, tol=TOL)
+                result = sim.run()
 
                 # log results
                 result.update(
@@ -74,7 +82,6 @@ def run_learning(
                 result.update(
                     {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 )
-
                 data.append(result)
     return data
 
@@ -93,6 +100,7 @@ if __name__ == "__main__":
         FPSB(n_agents, n_discr, valuations=valuations, interval=interval),
         SPSB(n_agents, n_discr, valuations=valuations, interval=interval),
         AllPay(n_agents, n_discr, valuations=valuations, interval=interval),
+        WarOfAttrition(n_agents, n_discr, valuations=valuations, interval=interval),
         Contest(
             n_agents, n_discr, valuations=valuations, interval=interval, csf_param=1.0
         ),
@@ -101,9 +109,12 @@ if __name__ == "__main__":
     # run experiments
     df = pd.DataFrame()
     for econgame in games:
+        t0 = time()
         print(f"Run Experiment for {econgame}")
         result = run_learning(econgame, n_bins, n_runs)
         df = pd.concat([df, pd.DataFrame(result)])
+        t1 = time()
+        print(f"Runtime {((t1-t0)/60):1f}min\n")
 
     # save results
     tag, filename = (

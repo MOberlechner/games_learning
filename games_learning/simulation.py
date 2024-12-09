@@ -1,52 +1,51 @@
 from collections import deque
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from tqdm import tqdm
 
-from games_learning.game.matrix_game import MatrixGame
 from games_learning.learner.learner import Learner
+from games_learning.strategy import Strategy
 
 
 class Simulator:
     def __init__(
-        self, game: MatrixGame, learner: Learner, max_iter: int, tol: float = 0
+        self, strategy: Strategy, learner: Learner, max_iter: int, tol: float = 0
     ) -> None:
         """simulate learning
 
         Args:
-            game (Game): underlying game
+            strategy (Strategy): mixed strategy
             learner (Learner): learning method
             max_iter (int): maximal number of iterations
             tol (float): stopping criteration for learner
         """
-        self.game = game
+        self.strategy = strategy
         self.learner = learner
         self.max_iter = max_iter
         self.tol = tol
-        self.agents = self.game.agents
+        self.agents = self.strategy.agents
 
         self.log_data = self.init_log_data()
         self.bool_convergence = None
         self.number_iter = max_iter
 
-    def run(self, init_strategies: List[np.ndarray], show_bar: bool = True) -> None:
-        """run learning dynamics
+    def run(self, show_bar: bool = True, simultaneous: bool = True) -> None:
+        """run (simultaneous) learning dynamics
 
         Args:
-            init_strategies (List[np.ndarray]): initial strategies
-            show_bar (bool): show progress bar
+            show_bar (bool): show progress bar. Defaluts to True.
+            simultaneous (bool): update are agents simultaneously (True) or sequentially (False). Defaults to True
         """
         self.bool_convergence = False
-        strategies = init_strategies
 
         for t in tqdm(range(self.max_iter), disable=~show_bar):
 
             # compute gradients
-            gradients = tuple(self.game.gradient(strategies, i) for i in self.agents)
+            gradients = self.strategy.y
 
             # log
-            self.log_iteration(strategies, gradients)
+            self.log_iteration(gradients)
 
             # check convergence
             if self.check_convergence():
@@ -54,8 +53,17 @@ class Simulator:
                 self.number_iter = t + 1
                 break
 
-            # update strategies
-            strategies = self.learner.update(strategies, gradients, t)
+            if simultaneous:
+                # update strategies simultaneously
+                x_new = self.learner.update(self.strategy, gradients, t)
+                self.strategy.x = x_new
+
+            else:
+                # update strategies sequentially
+                for i in self.agents:
+                    gradient = self.strategy.gradient(agent=i)
+                    xi_new = self.learner.update_agent(self.strategy, i, gradient, t)
+                    self.strategy.x[i] = xi_new
 
         return self.log_result()
 
@@ -73,22 +81,22 @@ class Simulator:
             "gradients": [deque(maxlen=self.max_iter) for i in self.agents],
         }
 
-    def log_iteration(
-        self, strategies: List[np.ndarray], gradients: List[np.ndarray]
-    ) -> None:
+    def log_iteration(self, gradients: Tuple[np.ndarray]) -> None:
         """log some interesting stuff"""
         for i in self.agents:
-            self.log_data["utility"][i].append(self.game.utility(strategies, i))
-            self.log_data["utility_loss"][i].append(
-                self.game.utility_loss(strategies, i, normed=True)
+            self.log_data["utility"][i].append(
+                self.strategy.utility(agent=i, gradient=gradients[i])
             )
-            self.log_data["strategies"][i].append(strategies[i])
+            self.log_data["utility_loss"][i].append(
+                self.strategy.utility_loss(agent=i, gradient=gradients[i], method="rel")
+            )
+            self.log_data["strategies"][i].append(self.strategy.x[i])
             self.log_data["gradients"][i].append(gradients[i])
 
     def log_result(self) -> dict:
         """log final result"""
         return {
-            "game": self.game.name,
+            "game": self.strategy.game.name,
             "learner": self.learner.name,
             "convergence": self.bool_convergence,
             "iterations": self.number_iter,

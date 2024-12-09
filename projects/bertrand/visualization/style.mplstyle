@@ -1,0 +1,49 @@
+# Custom style sheet for matplotlib
+# See: https://www.datafantic.com/the-magic-of-matplotlib-stylesheets/
+
+figure.dpi : 200
+figure.figsize : 3.4, 3.4
+
+
+# Axes
+axes.labelcolor: .15
+axes.prop_cycle: cycler(color=["#0571b0","#92c5de","#f4a582","#ca0020"]) + cycler(linestyle=["-", "--", "-.", ":"])
+
+# Grid
+grid.linewidth: 0.8
+patch.linewidth: 0.24
+
+# Lines
+lines.markeredgewidth: 1
+lines.linewidth: 1.75
+lines.markersize: 7
+lines.solid_capstyle: round
+
+# Ticks
+xtick.major.width: 0.8
+ytick.major.width: 0.8
+xtick.minor.width: 0.4
+ytick.minor.width: 0.4
+xtick.major.pad: 5.6
+ytick.major.pad: 5.6
+
+# Font
+text.usetex: True # Only available if latex is installed
+font.family: serif
+font.sans-serif: Arial, Liberation Sans, DejaVu Sans, Bitstream Vera Sans, sans-serif
+font.serif: Computer Modern
+# font.serif: DejaVu Serif
+font.size: 10
+axes.titlesize: 10
+axes.labelsize: 10
+xtick.labelsize: 10
+ytick.labelsize: 10
+legend.fontsize: 10
+figure.titlesize: 10
+
+# Legend
+legend.frameon: True
+legend.numpoints: 1
+legend.scatterpoints: 1
+legend.loc: upper right
+legend.framealpha: 1.0

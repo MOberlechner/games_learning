@@ -2,6 +2,7 @@ import multiprocessing
 import os
 import sys
 from collections import deque
+from copy import deepcopy
 from datetime import datetime
 from functools import partial
 from itertools import product
@@ -11,11 +12,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-sys.path.append(os.path.realpath("/home/oberlechner/code/matrix_game_learning"))
-
 from games_learning.game.matrix_game import RandomMatrixGame
-from games_learning.learner.learner import MirrorAscent
+from games_learning.learner.mirror_ascent import MirrorAscent
 from games_learning.simulation import Simulator
+from games_learning.strategy import Strategy
 from projects.hodge.configs import *
 from projects.hodge.util import (
     map_bin_to_potentialness,
@@ -63,7 +63,7 @@ def get_seeds(
 
 def run_learning_stepsizes(
     n_agents: int,
-    n_actions: int,
+    actions: int,
     n_bins,
     n_samples_per_bin: int,
     n_runs: int,
@@ -78,7 +78,7 @@ def run_learning_stepsizes(
 
     Args:
         n_agents (int): number of agents
-        n_actions (int): number of actions (per agent)
+        actions (int): number of actions (per agent)
         n_bins (int): divide [0, 1] in equally sized bins
         n_samples_per_bin (int): number of sampled games with potentialness (from subinterval, i.e., bin)
         n_runs (int): number of runs per game
@@ -88,26 +88,31 @@ def run_learning_stepsizes(
         dir_save (str): directory to store results
     """
     print(
-        f"Run Experiment for {n_agents} agents and {n_actions} actions, {n_runs} runs and {init} initialization:"
+        f"Run Experiment for {n_agents} agents and {actions} actions, {n_runs} runs and {init} initialization:"
     )
 
     # get seeds which give us equally many games for all levels of potentialness
-    seeds = get_seeds(n_actions, n_agents, n_bins, n_samples_per_bin, distribution, dir)
+    seeds = get_seeds(actions, n_agents, n_bins, n_samples_per_bin, distribution, dir)
     data = deque()
 
     for seed, bin in tqdm(seeds):
-        actions = [n_actions] * n_agents
-        game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
+        n_actions = [actions] * n_agents
+        game = RandomMatrixGame(
+            n_actions=n_actions, seed=seed, distribution=distribution
+        )
 
         for run in range(n_runs):
-            init_strat = game.init_strategies(init)
+            init_strategies = Strategy(game, init_method="random")
 
             for eta, beta in product(LIST_ETA, LIST_BETA):
                 learner = MirrorAscent(eta=eta, beta=beta, mirror_map="entropic")
 
                 # run experiment
-                sim = Simulator(game, learner, MAX_ITER, TOL)
-                result = sim.run(init_strat)
+                strategies = deepcopy(
+                    init_strategies
+                )  # use same initial strategy for different learner
+                sim = Simulator(strategies, learner, max_iter=MAX_ITER, tol=TOL)
+                result = sim.run()
 
                 # log results
                 result.update(

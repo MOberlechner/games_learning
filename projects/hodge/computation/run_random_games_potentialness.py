@@ -11,14 +11,10 @@ sys.path.append(os.path.realpath("/home/oberlechner/code/matrix_game_learning"))
 
 import numpy as np
 import pandas as pd
-from decomposition.game import Game
+from games_decomposition.game import Game
 from tqdm import tqdm
 
-from games_learning.game.econ_game import FPSB, SPSB, AllPay, Contest, EconGame
 from games_learning.game.matrix_game import MatrixGame, RandomMatrixGame
-from games_learning.learner.learner import MirrorAscent
-from games_learning.simulation import Simulator
-from games_learning.utils.equil import find_pure_nash_equilibrium
 from projects.hodge.configs import *
 from projects.hodge.util import save_result
 
@@ -26,7 +22,7 @@ from projects.hodge.util import save_result
 def run_random_potentialness(
     seeds: List[int],
     hodge: Game,
-    actions: List[int],
+    n_actions: List[int],
     distribution: str,
     compute_equil: bool = False,
     flow: bool = False,
@@ -36,7 +32,9 @@ def run_random_potentialness(
     n_agents = hodge.n_agents
 
     for seed in tqdm(seeds):
-        game = RandomMatrixGame(n_agents, actions, seed=seed, distribution=distribution)
+        game = RandomMatrixGame(
+            n_actions=n_actions, seed=seed, distribution=distribution
+        )
         if flow:
             hodge.compute_flow_decomposition_matrix(game.payoff_matrix)
             potentialness = hodge.flow_metric
@@ -53,7 +51,7 @@ def run_random_potentialness(
             }
 
         if compute_equil:
-            pure_equil = find_pure_nash_equilibrium(game)
+            pure_equil = game.get_pne()
             equilibria = {
                 "n_weak_ne": len(pure_equil["weak_ne"]),
                 "n_strict_ne": len(pure_equil["strict_ne"]),
@@ -67,7 +65,7 @@ def run_random_potentialness(
 
 
 def run_random_potentialness_mp(
-    actions: List[int],
+    n_actions: List[int],
     n_samples: int,
     distribution: str,
     dir: str,
@@ -79,7 +77,7 @@ def run_random_potentialness_mp(
     Note that multiprocessing only useful for smaller settings
 
     Args:
-        actions (List[int]): setting, e.g. [3, 3] = 2 agents with 3 actions
+        n_actions (List[int]): setting, e.g. [3, 3] = 2 agents with 3 actions
         n_samples (int): number of samples
         distribution (str): distribution of generated payoff entries
         dir (str): directory to save results
@@ -94,7 +92,7 @@ def run_random_potentialness_mp(
 
     # create game (structure)
     hodge = Game(
-        actions,
+        n_actions,
         save_load=False,
     )
 
@@ -102,7 +100,7 @@ def run_random_potentialness_mp(
     func = partial(
         run_random_potentialness,
         hodge=hodge,
-        actions=actions,
+        n_actions=n_actions,
         distribution=distribution,
         compute_equil=compute_equil,
         flow=flow,
@@ -120,18 +118,18 @@ def run_random_potentialness_mp(
 
     # save results
     data = deque(chain.from_iterable(results))
-    save_result(data, dir, f"{distribution}_{actions}.csv", PATH_TO_DATA)
+    save_result(data, dir, f"{distribution}_{n_actions}.csv", PATH_TO_DATA)
 
 
 if __name__ == "__main__":
 
     # compute potentialness for random games
     settings = SETTINGS
-    for n_agents, n_actions in settings:
-        actions = [n_actions] * n_agents
-        print(f"Experiment: {actions}")
+    for n_agents, actions in settings:
+        n_actions = [actions] * n_agents
+        print(f"Experiment: {n_actions}")
         run_random_potentialness_mp(
-            actions=actions,
+            n_actions=n_actions,
             n_samples=1_000_000,
             distribution="uniform",
             dir="random_flow_1e6",
