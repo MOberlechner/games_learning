@@ -424,6 +424,12 @@ class WarOfAttrition(EconGame):
         self.name = "war_of_attrition"
 
     def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
+        """ex-post utility for War of Attrition"""
+        return self.ex_post_utility_bayesian(action_profile, self.valuations)
+
+    def ex_post_utility_bayesian(
+        self, action_profile: np.ndarray, type_profile: np.ndarray
+    ) -> np.ndarray:
         # compute allocation
         action_max = np.array(action_profile) == np.array(action_profile).max()
         allocation = action_max / action_max.sum()
@@ -432,8 +438,7 @@ class WarOfAttrition(EconGame):
         second_price = np.sort(action_profile)[-2]
         # compute ex-post utility
         return (
-            allocation * (self.valuations - second_price)
-            - (1 - allocation) * first_price
+            allocation * (type_profile - second_price) - (1 - allocation) * first_price
         )
 
 
