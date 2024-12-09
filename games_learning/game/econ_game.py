@@ -442,46 +442,6 @@ class WarOfAttrition(EconGame):
         )
 
 
-class TragedyOfCommons(EconGame):
-    """Tragedy of Commons"""
-
-    def __init__(
-        self,
-        n_agents: int,
-        n_discr: int,
-        interval: Tuple[float] = (0.0, 1.0),
-    ):
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "tragedy_of_commons"
-
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        # compute ex-post utility
-        return action_profile * (1 - action_profile.sum())
-
-
-class PublicGood(EconGame):
-    """Public Good"""
-
-    def __init__(
-        self,
-        n_agents: int,
-        n_discr: int,
-        interval: Tuple[float] = (0.0, 1.0),
-    ):
-        # self.f = lambda x: 1.2 * x / n_agents
-        # self.g = lambda x: x
-        self.f = lambda x: 10 * x if x <= 15 else 10 * x - (x - 15) ** 2
-        self.g = lambda x: 2 * x
-
-        super().__init__(n_agents, n_discr, interval)
-        self.name = "public_good"
-
-    def ex_post_utility(self, action_profile: np.ndarray) -> np.ndarray:
-        # compute ex-post utility
-        total_contribution = action_profile.sum()
-        return self.f(total_contribution) - self.g(action_profile)
-
-
 class CustomUtilityGame(EconGame):
     """My game"""
 
