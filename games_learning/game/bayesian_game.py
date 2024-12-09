@@ -14,8 +14,7 @@ class BayesianEconGame(MatrixGame):
     def __init__(
         self,
         econ_game: EconGame,
-        n_discr: int,
-        interval: Tuple[float, float] = (0.0, 1.0),
+        types: np.ndarray,
         distribution: str = "uniform",
         monotone_strategies: bool = False,
     ):
@@ -23,8 +22,8 @@ class BayesianEconGame(MatrixGame):
         self.agents = econ_game.agents
         self.n_agents = econ_game.n_agents
         self.bayesian_actions = econ_game.actions
-        self.bayesian_types = np.linspace(*interval, n_discr)
-        self.prior = self.get_prior(distribution, n_discr)
+        self.bayesian_types = types
+        self.prior = self.get_prior(distribution, len(types))
         self.monotone_strategies = monotone_strategies
 
         self.create_strategies()
