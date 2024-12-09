@@ -9,7 +9,14 @@ import pandas as pd
 from games_decomposition.game import Game
 from tqdm import tqdm
 
-from games_learning.game.econ_game import FPSB, SPSB, AllPay, Contest, EconGame
+from games_learning.game.econ_game import (
+    FPSB,
+    SPSB,
+    AllPay,
+    Contest,
+    EconGame,
+    WarOfAttrition,
+)
 from games_learning.game.matrix_game import MatrixGame
 from games_learning.learner.mirror_ascent import MirrorAscent
 from games_learning.simulation import Simulator
@@ -93,6 +100,7 @@ if __name__ == "__main__":
         FPSB(n_agents, n_discr, valuations=valuations, interval=interval),
         SPSB(n_agents, n_discr, valuations=valuations, interval=interval),
         AllPay(n_agents, n_discr, valuations=valuations, interval=interval),
+        WarOfAttrition(n_agents, n_discr, valuations=valuations, interval=interval),
         Contest(
             n_agents, n_discr, valuations=valuations, interval=interval, csf_param=1.0
         ),
