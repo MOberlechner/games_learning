@@ -40,6 +40,10 @@ def get_colors(i, n):
     if n == 1:
         return cmap(1)
 
+    if n == 5:
+        idx = n - 1 - i if i > 2 else n - i
+        return cmap(idx / 5)
+
     idx = n - 1 - i
     if n % 2:
         return cmap(0.1 + idx / (n - 1) * 0.8)

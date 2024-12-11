@@ -20,6 +20,7 @@ PATH_TO_RESULTS = "projects/hodge/figures/"
 plt.rcParams["font.family"] = "Times New Roman"
 CMAP = matplotlib.colormaps["RdBu"]
 LS = ["solid", "dashed", "dashdot", "dotted"]
+MARKER = ["o", "v", "s", "d", "^"]
 FONTSIZE_LABEL = 12
 FONTSIZE_TITLE = 12
 FONTSIZE_LEGEND = 12
