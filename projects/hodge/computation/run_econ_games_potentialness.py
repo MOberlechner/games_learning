@@ -37,16 +37,7 @@ def get_valuations(setting: str, n_agents: int) -> Tuple[float]:
 
 
 def get_types(n_types: int) -> List:
-    if n_types == 1:
-        return np.array([1.0])
-    elif n_types == 2:
-        return np.array([0.5, 1])
-    elif n_types == 3:
-        return np.array([0.3, 0.6, 1.0])
-    elif n_types == 4:
-        return np.array([0.25, 0.50, 0.75, 1.0])
-    else:
-        return None
+    return [i / n_types for i in range(1, n_types + 1)]
 
 
 def get_number_strategies(n_types, n_actions) -> int:
@@ -61,7 +52,7 @@ def run_econgames_bayesian_potentialness(
     n_agents = 2
     valuations = (1.0, 1.0)
     n_actions = 4
-    interval = (0.0, 0.95)
+    interval = (0.0, 0.90)
     games = [
         FPSB(n_agents, n_actions, valuations=valuations, interval=interval),
         SPSB(n_agents, n_actions, valuations=valuations, interval=interval),
@@ -179,7 +170,7 @@ if __name__ == "__main__":
     n_agents = 2
     list_n_discr = range(3, 26)
     run_econgames_potentialness(
-        n_agents, list_n_discr, interval=(0.0, 0.95), compute_equil=True
+        n_agents, list_n_discr, interval=(0.0, 0.90), compute_equil=True
     )
 
     # compute potentialness for bayesian econgames
