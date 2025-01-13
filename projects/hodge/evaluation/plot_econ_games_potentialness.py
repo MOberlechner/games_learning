@@ -67,7 +67,7 @@ def plot_potentialness_discretization(list_n_discr, games, label_games):
     fig, ax = set_axis(
         (list_n_discr[0] - 1, list_n_discr[-1] + 1),
         (0, 1),
-        xlabel="Discretization",
+        xlabel="# Actions",
         ylabel="Potentialness",
     )
     for i, game in enumerate(games):

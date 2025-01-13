@@ -1,4 +1,8 @@
 import os
+import sys
+
+sys.path.append(os.path.realpath("."))
+
 from itertools import product
 
 import matplotlib.pyplot as plt
@@ -125,11 +129,9 @@ if __name__ == "__main__":
     # economic games
     n_agents = 2
     n_discr = 11
-    list_games = ["allpay", "spsb", "fpsb", "contest"]
-    label_games = ["All-pay", "SPSB", "FSPB", "Contest"]
+    games = ["contest", "spsb", "fpsb", "war_of_attrition", "allpay"]
+    label_games = ["Contest", "SPSB", "FPSB", "WoA", "Allpay"]
 
     for eta, beta in product(LIST_ETA, LIST_BETA):
         name = f"econgames_learning_{eta}_{beta}"
-        plot(
-            list_games, label_games, n_agents, n_discr, n_bins, n_runs, eta, beta, name
-        )
+        plot(games, label_games, n_agents, n_discr, n_bins, n_runs, eta, beta, name)
