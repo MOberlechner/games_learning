@@ -1,0 +1,10 @@
+numpy
+pandas
+gurobipy
+matplotlib
+tqdm
+ipykernel
+pre-commit
+black
+isort
+pulp
