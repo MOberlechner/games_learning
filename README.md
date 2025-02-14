@@ -7,22 +7,17 @@ The implementation focuses on
 - **Matrix Games**
     - Randomly generated Matrix Games
     - Economic Games (complete-information auctions, contests, and oligopolies)
+    - Bayesian Games (transforms discrete Bayesian games in matrix games)
 
 - **Learning Algorithms**
-    - Online Mirror Descent 
-    - tbd
+    - Online Mirror Descent (with entropic regularizer)
+    - Best Response Dynamics
 
 ### Projects
 
 |  | Description |
 | ------- | ----------- |
-| [**tbd**](./projects/)<br>| ... |
-
-
-### How does it work?
-tbd
-
-
+| [**hodge**](./projects/hodge/)<br>| Analyze connection of potentialness and convergence of learning algorithms in matrix games. We focus on randomly generated games and complete-information economic games (e.g., auctions, contests). |
 
 ## Setup
 <details><summary>
