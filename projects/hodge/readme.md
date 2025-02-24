@@ -1,4 +1,8 @@
-# Project: HODGE <br> Characterizing the Convergence of Game Dynamics via Potentialness 
+# Project: HODGE <br>
+
+> **Characterizing the Convergence of Game Dynamics via Potentialness** <br> 
+>*M. Bichler, D. Legacci, P. Mertikopoulos, M. Oberlechner, B. Pradelski*, 2025
+
 This project focuses on the connection between learnable equilibria and the potentialness of the game.
 Additional to the packages in [requirements.txt](../../requirements.txt), we also need the [decomposition](https://github.com/MOberlechner/games_decomposition) package which computes the hodge decomposition of a matrix game.
 Clone the project and install the package via
