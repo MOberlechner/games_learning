@@ -17,7 +17,7 @@ The implementation focuses on
 
 | Project | Description |
 | ------- | ------------------------------------------ |
-| [**hodge**](./projects/hodge/)<br>| **Characterizing the Convergence of Game Dynamics via Potentialness** <br> *M. Bichler, D. Legacci, P. Mertikopoulos, M. Oberlechner, B. Pradelski*, 2025  <br> We analyze the connection of potentialness and convergence of learning algorithms in matrix games. We focus on randomly generated games and complete-information economic games (e.g., auctions, contests). |
+| [**hodge**](./projects/hodge/)<br>| **Characterizing the Convergence of Game Dynamics via Potentialness** <br> *M. Bichler, D. Legacci, P. Mertikopoulos, M. Oberlechner, B. Pradelski* <br> Transactions on Machine Learning Research, 2025 [[pdf]](https://openreview.net/pdf?id=Is9APiPg4V) |
 
 ## Setup
 <details><summary>
