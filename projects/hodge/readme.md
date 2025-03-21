@@ -1,9 +1,32 @@
 # Project: HODGE <br>
 
-> **Characterizing the Convergence of Game Dynamics via Potentialness** <br> 
->*M. Bichler, D. Legacci, P. Mertikopoulos, M. Oberlechner, B. Pradelski*, 2025
+This project contains the code of the publication:
 
-This project focuses on the connection between learnable equilibria and the potentialness of the game.
+> **Characterizing the Convergence of Game Dynamics via Potentialness** <br> 
+>*M. Bichler, D. Legacci, P. Mertikopoulos, M. Oberlechner, B. Pradelski* <br>
+> Transactions on Machine Learning Research, 2025 [[pdf]](https://openreview.net/pdf?id=Is9APiPg4V)
+
+<details><summary>
+How to cite the paper.
+</summary>
+
+```bibtex
+@article{bichler2025characterizing,
+title={Characterizing the Convergence of Game Dynamics via Potentialness},
+author={Martin Bichler and Davide Legacci and Panayotis Mertikopoulos and Matthias Oberlechner and Bary Pradelski},
+journal={Transactions on Machine Learning Research},
+issn={2835-8856},
+year={2025},
+url={https://openreview.net/forum?id=Is9APiPg4V},
+note={}
+}
+```
+
+</details>
+
+---
+
+We focus on the connection between learnable equilibria and the potentialness of the game.
 Additional to the packages in [requirements.txt](../../requirements.txt), we also need the [decomposition](https://github.com/MOberlechner/games_decomposition) package which computes the hodge decomposition of a matrix game.
 Clone the project and install the package via
 ```python
